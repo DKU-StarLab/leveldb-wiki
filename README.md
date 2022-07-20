@@ -1,4 +1,4 @@
-# leveldb-wiki
+# leveldb-wiki (KOR)
 -------------
 ## Background
 #### 1. What is a key-value store?
@@ -23,11 +23,19 @@
 #### 2. Analysis Tools
 * Understand
 * GDB (shell script)
-* Uftrace (sheel script)
+* Uftrace (shell script)
 #### 3. Homework (db_bench practice)
+* [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
+* [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)
 #### 4. Benchmarks Analysis
+- [WAL](./benchmarks/wal.md)
+- [Memtable](./benchmarks/memtable.md)
+- [Compaction](./benchmarks/compaction.md)
+- [SSTable](./benchmarks/sstable.md)
+- [Bloom Filter](./benchmarks/bloomfilter.md)
+- [Cache](./benchmarks/cache.md)
 #### 5. Real-world Workload Tuning
-
+- Twitter Trace
 -------------
 ## References
 
