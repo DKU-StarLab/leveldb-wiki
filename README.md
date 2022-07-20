@@ -25,14 +25,14 @@
 - [Cache](./benchmarks/cache.md)
 
 ## Apenddix
-####  1. LevelDB Install
-#### 2. Analysis Tools
+#####  1. LevelDB Install
+##### 2. Analysis Tools
 * Understand
 * GDB (shell script)
 * Uftrace (shell script)
-#### 3. LevelDB db_bench practice
+##### 3. LevelDB db_bench practice
 * [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
 * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)
-#### 4. Real-world Workload Tuning
+##### 4. Real-world Workload Tuning
 - Twitter Trace
-#### 5. [References](./references.md)
+##### 5. [References](./references.md)
