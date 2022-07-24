@@ -1,4 +1,4 @@
-# leveldb-wiki (KOR)
+# leveldb-wiki (kor)
 
 ### Background
 1. What is a key-value store?
