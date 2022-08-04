@@ -51,7 +51,7 @@
 * 5.[참고문헌](./references.md)
 
 ## 사진
-<img src="./image/photo1.jpg" width="70%">
+<img src="./image/photo1.jpg" width="80%">
 
 ## 포스터
 <img src="./image/poster_kor.png" width="70%">
