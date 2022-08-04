@@ -44,7 +44,7 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 - [Bloom Filter](./benchmarks/bloomfilter.md)
 - [Cache](./benchmarks/cache.md)
 
-## 부록
+### 부록
 1.LevelDB 설치
 
 2.분석툴 사용법
