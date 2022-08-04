@@ -19,6 +19,7 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 * 선임 조교: [이성현](https://github.com/shl812), [신호진](https://github.com/shinhojin)
 * 교수님: [최종무](http://embedded.dankook.ac.kr/~choijm/), [유시환](https://sites.google.com/site/dkumobileos/members/seehwanyoo)
 
+## 목차
 ### 배경
 1. 키-밸류 스토어란 무엇인가?
 2. 왜 오픈소스 인가?
@@ -61,7 +62,7 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 5.[참고문헌](./references.md)
 
 ## 사진
-<img src="./image/photo1.jpg" width="80%">
+<img src="./image/photo1.jpg" width="70%">
 
 ## 포스터
-<img src="./image/poster_kor.png" width="60%">
+<img src="./image/poster_kor.png" width="50%">
