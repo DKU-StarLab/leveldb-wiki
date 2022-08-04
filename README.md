@@ -49,3 +49,9 @@
 * 4.Real-world Workload 튜닝 대회
     - OSM
 * 5.[참고문헌](./references.md)
+
+## 사진
+<img src="./image/photo1.jpg" width="70%">
+
+## 포스터
+<img src="./image/poster_kor.png" width="70%">
