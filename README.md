@@ -38,17 +38,21 @@
 - [Cache](./benchmarks/cache.md)
 
 ## 부록
-* 1.LevelDB 설치
-* 2.분석툴 사용법
-    * Understand
-    * GDB (shell script)
-    * Uftrace (shell script)
-* 3.LevelDB db_bench 예제
-    * [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
-    * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)
-* 4.Real-world Workload 튜닝 대회
-    - OSM
-* 5.[참고문헌](./references.md)
+1.LevelDB 설치
+
+2.분석툴 사용법
+* Understand
+* GDB (shell script)
+* Uftrace (shell script)  
+
+3.LevelDB db_bench 예제
+* [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
+* [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
+
+4.Real-world Workload 튜닝 대회
+* OSM  
+
+5.[참고문헌](./references.md)
 
 ## 사진
 <img src="./image/photo1.jpg" width="80%">
