@@ -12,7 +12,7 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
   - 1.WAL/Manifest: [김이수](https://github.com/gooday2die), [박세연](https://github.com/SayOny), [신수환](https://github.com/Student5421)
   - 2.Memtable: [조태규](https://github.com/HASHTAG-YOU), [쥬용지에](https://github.com/arashio1111)
   - 3.Compaction: [강상우](https://github.com/aarom416), [박서영](https://github.com/seo-0), [좌오꾸와쒼](https://github.com/ErosBryant)
-  - 4.SSTable: [박종기](https://github.com/JongKI-PARK), [조상현](https://github.com/Cho-SangHyun), [조자영](https://github.com/cho-ja-young)
+  - 4.SSTable: [박종기](https://github.com/JongKI-PARK), [조상현](https://github.com/Cho-SangHyun)
   - 5.Bloom Filter: [김한수](https://github.com/gillyongs)
   - 6.Cache: [하승원](https://github.com/ha-seungwon), [홍수빈](https://github.com/sss654654)
 * 조교: [최민국](https://github.com/korea-choi)
