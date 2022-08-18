@@ -49,9 +49,9 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
  - [1등] Team SSTable 레포트
  - [2등] Team Bloom Filter 레포트
  - [3등] Team WAL/Manifest 레포트
- - [4등] Team Memtable 레포트
- - [5등] Team Cache 레포트
- - [6등] Team Compaction 레포트
+ - Team Memtable 레포트
+ - Team Cache 레포트
+ - Team Compaction 레포트
 
 
 ### 부록
