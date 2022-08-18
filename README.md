@@ -66,13 +66,10 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 * [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
 * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
-4.Real-world Workload 튜닝 대회
-* OSM  
-
-5.[참고문헌](./references.md)
-
 ## 사진
 <img src="./image/photo1.jpg" width="70%">
 
 ## 포스터
 <img src="./image/poster_kor.png" width="50%">
+
+## [참고문헌](./references.md)
