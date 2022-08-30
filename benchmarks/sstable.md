@@ -68,10 +68,11 @@ SSTable은 key-value pair들을 담는 Data Block, 각 Data Block들에 대한 �
 <br/>  
 
 - Latency
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/181172862-7d4635c1-9263-4926-9f49-eb68fbf1fa23.png"></p><br/>
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187409406-7151ae9f-658f-4506-a5c0-1d9da4fc57e6.png"></p><br/>  
 
 - Throughput  
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/181174429-a12f8a94-176d-466a-b9b7-eb895f58295a.png"></p><br/>  
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187409704-92b7be4b-9587-44e2-ba97-49b7cb014417.png"></p><br/>
+
 
 실험 전엔 블룸필터를 쓰지 않으면 쓰기를 할 때 `Latency`가 좀 더 낮아지고 `Throughput`이 좀 더 높아질 것이라 생각했는데, 실제로 블룸필터를 적용하지 않을 때가 적용했을 때에 비해 `Latency`가 낮게 나오고 `Throughput`은 높게 나오는걸 볼 수 있었다.<br/>  
 그러나 실험 전에는 쓰기 작업을 할 때 블룸 필터를 적용하는 경우와 적용하지 않는 경우 간에 좀 더 큰 차이가 날 것이라 생각했는데, 실제로는 `Latency`의 경우 하나의 key-value pair를 넣는데 있어서 0.5micros정도밖에 차이나지 않았다. 이 차이가 그리 크게 느껴지지 않아서, 왜 큰 차이가 나지 않았던 걸까에 대해 생각해봤다.<br/>  
