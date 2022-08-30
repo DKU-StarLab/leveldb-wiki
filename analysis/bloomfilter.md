@@ -1,6 +1,8 @@
 >#1 블룸 필터란 무엇인가
 
-<span style="color:yellow">test</span>
+<span style="color:yellow"> test </span>
+
+<mark style="background-color:orange"> test </mark>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
 
