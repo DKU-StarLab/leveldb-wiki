@@ -35,9 +35,13 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 6. [Bloom Filter](./analysis/bloomfilter.md)
 7. [Cache](./analysis/cache.md)
 8. [Manifest](./analysis/manifest.md)
+9. LevelDB db_bench
 
 ### 벤치마크 실험 분석
 - [WAL](./benchmarks/wal.md)
+    - 실험 1
+    - 실험 2
+    - 실험 3
 - [Memtable](./benchmarks/memtable.md)
 - [Compaction](./benchmarks/compaction.md)
 - [SSTable](./benchmarks/sstable.md)
