@@ -1,4 +1,4 @@
-# LevelDB WiKi
+# LevelDB WIKI
 [DKU System Software Lab](https://sslab.dankook.ac.kr/)에서 진행한 [2022 LevelDB 스터디](https://github.com/DKU-StarLab/leveldb-study)를 통해 작성된 LevelDB wiki입니다.  
 학생들이 스터디를 통해 LevelDB를 공부한 내용을 정리하여 작성한 문서입니다.
 
