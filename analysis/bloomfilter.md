@@ -452,7 +452,7 @@ filterpolicy를 포함한 캐시나 버퍼 사이즈 등의 변수들을 저장�
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426744-152b6145-f791-45f1-b45e-3e8c5139930f.png)
 
 
-디 다음 흐름은 위와 같은데 Compaction을 진행하고
+ 다음 흐름은 위와 같은데 Compaction을 진행하고
 
 필터 블록을 포함하여 SSTable을 생성한다.
 
@@ -478,7 +478,7 @@ BGWork()가 아닌 NeedsCompaction()이 수행되어 블룸 필터가 생성되�
 
 이후 마지막 GenerateFilter 함수에서,
 
-지금까지 유지해온 filterpolicy의 createFilter 함수를 호출하여 write를 진행한다.
+지금까지 해온 filterpolicy의 createFilter 함수를 호출하여 write를 진행한다.
 
 <br/>
 <br/>
@@ -622,7 +622,7 @@ TableCache::Get() 함수는 Table::InternalGet() 함수를 호출하여 각 테�
 
 InternalGet() 함수는 FilterBlockReader::KeyMayMatch() 함수를 통해 필터 블록을 탐색한 다음
 
-특정 key값이 존재하면 해당 블룸 필터가 가리키는 데이터 블록을 읽는다
+특정 key값이 존재하면 해당 블룸 필터가 가리키는 데이터 블록을 읽게된다
 
 <br/>
 <br/>
@@ -641,7 +641,7 @@ InternalGet() 함수는 FilterBlockReader::KeyMayMatch() 함수를 통해 필터
 ![img](https://user-images.githubusercontent.com/101636590/187571797-2acbf595-64cb-475d-a080-b3d74276ef80.png)
 
 
-해당 함수는 앞서 미리 설명하였던 블룸 필터의 핵심 코드 bloom.cc 파일의 함수이다.
+해당 함수는 앞서 미리 설명하였던 블룸 필터의 핵심 코드 bloom.cc 파일의 함수로,
 
 Write를 할 때 사용했던 hash 연산을 똑같이 처리한 다음
 
