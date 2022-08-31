@@ -34,11 +34,64 @@
 ---
 ## 3. LRU Cache Structure in LevelDB
 
-내용작성
+LevelDB의 Cache Structure를 파악하기 위하여 git clone을 통해 소스코드를 분석하였다.
 
-글
+(source code download)
+git clone --recurse-submodules https://github.com/google/leveldb.git  leveldb_release
 
-그림
+LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
+
+아래는 전체 LRU Cache Structure의 개략도이다.
+
+Check leveldb_release/build/util/cache.cc !!!
+
+![화면 캡처 2022-08-28 093945](https://user-images.githubusercontent.com/84978165/187053474-6c5b547b-871d-462d-8c64-36bf4ab7020e.jpg)
+
+(1) LevelDB내에서 Cache는 LRU Cache 16개를 구성하고 있는 ShardeLRUCache
+
++Sharded란?
+용량 이슈의 이유로 데이터를 분리하는 기법이다.
+
+![화면 캡처 2022-08-28 094806](https://user-images.githubusercontent.com/84978165/187053468-debca9c3-7bfd-4366-b454-e3dcfa6ce81e.jpg)
+
+(2) LRUCache의 각 Item은 LRUHandle이며 LRUHandle은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
+
+(3) 자료구조 HashTable과 똑같다.
+
+(4) LRUCache의 객체이다.
+
+LRUHandle의 구성요소:
+
+    struct LRUHandle {
+    void* value;
+    void (*deleter)(const Slice&, void* value);
+    LRUHandle* next_hash;
+    LRUHandle* next;
+    LRUHandle* prev;
+    size_t charge;  // TODO(opt): Only allow uint32_t?
+    size_t key_length;
+    bool in_cache;     // Whether entry is in the cache.
+    uint32_t refs;     // References, including cache reference, if present.
+    uint32_t hash;     // Hash of key(); used for fast sharding and comparisons
+    char key_data[1];  // Beginning of key
+
+    Slice key() const {
+    // next is only equal to this if the LRU handle is the list head of an
+    // empty list. List heads never have meaningful keys.
+    assert(next != this);
+
+    return Slice(key_data, key_length);
+  }
+};
+
+
++(5),(6)은 LRU Cache를 구성하는 자료구조인 double linked list이다.
+
++핸들테이블(해시테이블)은 양방향 목록과 결합되어 해시 테이블은 빠른 검색을 구현하고 양방향 목록은 빠른 추가 및 삭제를 구현한다.
+
+(5) in_use 목록 즉, 외부에서 사용되는 항목을 저장하기 위한 양방향 목록이다.
+
+(6)  lru 목록은 외부에서 사용되지 않는 항목을 저장하는 데 사용되며 캐시가 가득 차면 새 항목이 캐시에 추가되고 여기에서 희생자를 찾는다.
 
 
 ---
