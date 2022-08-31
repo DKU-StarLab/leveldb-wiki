@@ -64,14 +64,14 @@ SSTable은 key-value pair들을 담는 Data Block, 각 Data Block들에 대한 �
 <br/>  
 
 ## Discussion  
-블룸필터를 적용했을 때와 적용하지 않았을 때의 `Latency`와 `Throughput`을 비교하면 다음과 같다.  
+위 결과를 토대로 블룸필터를 적용했을 때와 적용하지 않았을 때의 평균 `Latency`와 `Throughput`을 비교하면 다음과 같다.  
 <br/>  
 
 - Latency
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187409406-7151ae9f-658f-4506-a5c0-1d9da4fc57e6.png"></p><br/>  
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187726811-56a5f707-7734-45b7-b638-e2645bc55f14.png"></p><br/>  
 
 - Throughput  
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187409704-92b7be4b-9587-44e2-ba97-49b7cb014417.png"></p><br/>
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187726961-c13fc1dc-8c00-4f1e-9644-6cec629107a6.png"></p><br/>
 
 
 실험 전엔 블룸필터를 쓰지 않으면 쓰기를 할 때 `Latency`가 좀 더 낮아지고 `Throughput`이 좀 더 높아질 것이라 생각했는데, 실제로 블룸필터를 적용하지 않을 때가 적용했을 때에 비해 `Latency`가 낮게 나오고 `Throughput`은 높게 나오는걸 볼 수 있었다.<br/>  
