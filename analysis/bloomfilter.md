@@ -2,48 +2,48 @@
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
 
-블룸 필터는 데이터 블록에 특정 key 값의 존재 여부를 빠르게 확인할 수 있는 확률적 자료 구조이다.
+블룸 필터는 데이터 블록에 특정 key의 데이터가 존재하는지 확인할 수 있는 확률적 자료 구조이다.
 
-Write를 할 때엔 각각의 key에 k개의 해시 함수를 수행하여 각 key 마다 k개의 해시 값을 얻고,
+블룸 필터는 데이터를 Write를 할 때에 각각의 key에 k개의 해시 함수를 수행하여 각 key 마다 k개의 해시 값을 얻고,
 
-해당 값에 해당하는 블룸 필터 배열 칸의 값을 0에서 1로 수정하여
+해당 값에 해당하는 블룸 필터 배열 칸들의 값을 0에서 1로 수정하여 해당 key가 데이터 블록에 존재함을 나타낸다.
 
-해당 데이터 블록에 해당 key 값이 존재함을 나타낸다.
+그럴경우 반대로 Read를 할 때엔 데이터 블록을 하나하나 전부 읽는 대신
 
-반대로 Read를 할 때엔 읽으려는 key에 똑같은 k개의 해시 함수를 수행하여 k개의 해시 값을 얻고
+읽으려는 데이터에 동일한 k개의 해시 함수를 수행하여 k개의 해시 값을 얻고
 
-해당 배열 값이 전부 1인 데이터 블록만을 선별하여 읽는 것으로 읽기 증폭을 대폭 감소시킨다.
-  
+해당 배열 칸의 값이 전부 1인 데이터 블록만을 선별하여 읽는 것으로 Read 성능을 향상시키는 것이 가능하다.
+<br><br><br><br>
    
-  
+
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424577-84d02a8f-c306-431f-b7b9-df92d3c2027b.png)
 
-참고로 하나의 sstable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
+하나의 sstable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
 
-필터 블록엔 n개의 블룸 필터 배열이, 메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 필터인지 저장한다.
+필터 블록엔 n개의 블룸 필터 배열이, 메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 필터인지 저장한다.<br>
   
+  <br><br><br><br>
    
    
-   
   
-  
+>#2 False Positive
+
+
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424609-121954ba-8a0d-486e-83f5-c4102a669c8e.png)
 
-블룸 필터의 장점은 True Negative가 발생하지 않는단 점이다.
+블룸 필터의 장점은 True Negative가 절대로 발생하지 않는단 점이다.
 
-블룸 필터를 통해 특정 key의 값이 존재하지 않는다 판단되면,
-
-해당 key 값은 절대로 해당 데이터 블록에 존재하지 않는다.
+True Negative는 데이터베이스에 존재하는 데이터를 존재하지 않는다 판단하는 것으로,
 
 이는 필터의 신뢰성과 직결된 문제이므로 True Negative가 발생하지 않는단 점은 큰 장점이다.
-  
-   
 
-다만 반대로 존재하지 않는 값을 존재한다 판단하는 False Positive의 경우 종종 발생할 수 있는데,
+<br>
 
-이는 True Negative보단 덜 중요한 문제이지만
+다만 반대로, 존재하지 않는 데이터을 존재한다 판단하는 False Positive의 경우엔 종종 발생할 수 있는데,
 
-False Positive로 인해 읽을 필요 없는 데이터 블록까지 읽어 성능이 떨어지므로
+이는 True Negative보단 상대적으로 덜 중요한 문제이지만
+
+False Positive로 인해 읽을 필요 없는 데이터 블록까지 읽어 성능이 떨어지게 되므로
 
 False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제이다.
   
@@ -54,15 +54,15 @@ False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제이다.
 <br/>
 <br/>
 
->#2 블룸 필터의 구조와 해시 함수
+
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424697-ef93e101-a865-47a3-9e14-2046590dd9d9.png)
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424752-f19bab99-09cd-4c83-9686-c0de4776c88d.png)
 
-db_bench를 통해 실험을 돌릴 때,
+LevelDB가 제공하는 벤치마킹 도구인 db_bench를 통해 측정을 진행할 때,
 
-우리는 key당 bits 값 (Bloom_bits)이나 쓰거나 읽을 데이터의 갯수 (Num)를 조절할 수 있다.
+우리는 key 하나당 사용할 비트의 갯수(Bloom_bits)나 쓰거나 읽을 데이터의 갯수(Num) 등을 조절할 수 있다.
 
 이때 생성되는 블룸 필터 배열의 크기는 B*N bits가 된다.
 
@@ -78,7 +78,10 @@ db_bench에선 블룸 필터를 사용하지 않는 것이 디폴트 값이기�
 
  
 
-
+<br/>
+<br/>
+<br/>
+<br/>
  
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424934-cea90e5b-ca24-449a-90f4-53dc6452f539.png)
@@ -93,6 +96,10 @@ db_bench에선 블룸 필터를 사용하지 않는 것이 디폴트 값이기�
 
 이 역시 bloom.cc 파일의 코드에서 구현되어 있는 것을 확인할 수 있다.
 
+<br/>
+<br/>
+<br/>
+<br/>
  
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424987-d8a58b47-0e68-4f13-b3d1-bc7ea413406a.png)
 
@@ -107,7 +114,10 @@ k의 값이 클수록 false positive가 발생할 확률이 작아짐을 알 수
 
 (그리고 k = ln2 * b = 0.69 b 이므로 b가 증가하면 k가 증가한다.)
 
-
+<br/>
+<br/>
+<br/>
+<br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425038-94b8594d-a3c9-4325-8ddc-61f6c90c89b9.png)
 
@@ -117,7 +127,10 @@ false positive가 적게 발생하여 평균보다 성능이 빠른 경우가 �
 
  
 
- 
+ <br/>
+<br/>
+<br/>
+<br/>
 
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425050-e20cbdb2-f988-45aa-bb71-f423c77236f8.png)
@@ -195,7 +208,10 @@ benchmark.Run()도 크게 3가지 부분으로 나눌 수 있는데,
 
 (bloom_bits의 디폴트 값은 -1로 따로 설정하지 않으면 블룸 필터를 사용하지 않는다.)
 
- 
+ <br/>
+<br/>
+<br/>
+<br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426008-acd92e3d-9adf-4d7b-8986-2c248e6705b1.png)
 
