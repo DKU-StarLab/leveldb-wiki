@@ -147,8 +147,8 @@ false positive가 적게 발생하여 평균보다 성능이 빠른 경우가 �
 
 이는 bloom.cc 코드에서 해시 함수의 최대 개수를 30개로 제한하고 있기에
 
-k = ln2 * b 라는 공식이 지켜지지 않아 되려 false positive가 증가한 것으로 다.
-
+k = ln2 * b 라는 공식이 지켜지지 않아 되려 false positive가 증가한 것으로 추정된다.
+<br/>
  <br/>
 <br/>
 <br/>
