@@ -3,7 +3,7 @@
 학생들이 스터디를 통해 LevelDB를 공부한 내용을 정리하여 작성한 문서입니다.
 
 이 문서는 LevelDB의 배경, 구조, 분석 그리고 분석하는 방법에 대해 설명합니다.  
-DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https://sslab.dankook.ac.kr/leveldb-wiki-home/)으로 편하게 읽어보실 수 있습니다.
+DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https://sslab.dankook.ac.kr/leveldb-wiki/)으로 편하게 읽어보실 수 있습니다.
 
 문서 내용에 오류가 있거나, 추가사항이 있으시다면 언제든지 Pull Request를 통해 기여해주시면 감사하겠습니다.
 
