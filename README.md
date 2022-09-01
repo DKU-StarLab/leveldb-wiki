@@ -71,7 +71,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
 ## 사진
-<img src="./image/photo.png" width="70%">
+<img src="./image/photo.png" width="100%">
 
 ## 포스터
 <img src="./image/poster_kor.png" width="50%">
