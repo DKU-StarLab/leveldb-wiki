@@ -80,6 +80,10 @@ Data Block, Index Block, Meta Index Block은 BlockBuilder라는 동일한 객체
 - entry 5: key = chosh, value = v5
 - entry 6: key = chush, value = v6
 ```  
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187918354-89d666b2-8a44-401f-97e4-fbf63f5fde0d.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187968907-06fdea2b-b44c-4240-b529-c77a9f6112b8.png"></p>  
 
 `restart_interval`을 3으로 지정하여 3개의 레코드마다 `Restart Point`가 찍히는 것을 볼 수 있고, 이 `Restart Point`에 해당하는 Entry들은 다른 레코드들과는 달리 전체 key값을 저장하는 모습을 볼 수 있다.  
+
+## SSTable - Write & Read 
+[Write - SSTable이 만들어지는 과정](analysis/sstable-write.md)  
+[Read - SSTable에서 key를 찾는 과정](analysis/sstable-read.md)  
