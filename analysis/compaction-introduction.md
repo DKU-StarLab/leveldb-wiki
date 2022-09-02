@@ -32,3 +32,6 @@ compaction이 없으면  level 1 ~ N 까지(level 0 제외)의 key 원자성을 
 - FIFO Conpaction
 etc.
 
+## Compaction Code Flow
+![image](https://user-images.githubusercontent.com/86946575/188067273-44e604d2-3f74-49fc-90a1-da5959d06dac.png)
+
