@@ -32,6 +32,8 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 3. [Memtable]
 4. Compaction
     - [Compaction Introduction](./analysis/compaction-introduction.md)
+    - [Minor Compaction](./analysis/minor-compaction.md)
+    - [Iterator of Compaction](./analysis/Compaction-Iter.md)
 5. SSTable
     - [SSTable Format](./analysis/sstable.md)
     - [SSTable Write](./analysis/sstable-write.md)
