@@ -18,7 +18,7 @@
 하지만 빠른 처리 속도로 인해 꼭 필요한 장치이다.
 
 <p align="center">
-<img width="754" alt="스크린샷 2022-08-27 오후 2 15 50" src="https://user-images.githubusercontent.com/74447373/187015861-02659a06-9a5a-4951-8487-97f5d17ee9ea.png">
+<img width="700" alt="스크린샷 2022-08-27 오후 2 15 50" src="https://user-images.githubusercontent.com/74447373/187015861-02659a06-9a5a-4951-8487-97f5d17ee9ea.png">
 </p>
 
 
@@ -27,12 +27,13 @@
   LRU캐시란 말 그대로 Least Recently Used 알고리즘을 칭하는 말로 LRU캐시는 이 알고리즘을 사용하여 캐시를 처리하는 캐시를 말한다.
 
 <p align="center">
-<img width="661" alt="스크린샷 2022-08-27 오후 2 23 03" src="https://user-images.githubusercontent.com/74447373/187016130-35ee76ac-7b3e-4430-aa4e-80b1ec5a0506.png">
+<img width="700" alt="스크린샷 2022-08-27 오후 2 23 03" src="https://user-images.githubusercontent.com/74447373/187016130-35ee76ac-7b3e-4430-aa4e-80b1ec5a0506.png">
+</p>
 
  LRU캐시의 장점으로는 먼저 빠른 액세스 타임과 그리고 빠른 업데이트이다 탐색과 업데이트에서 각각 최악의 경우에서는 캐시를 탐색하는 O(n)의 시간복잡도를 필요로 함으로 빠름 탁색과 업데이트가 가능하다. 
   
  
-  LUR 캐시의 단점은 위 그림과 같은 방식으로 캐시가 처리가 되며 가장 오래 참조하지 않는 캐시의 위치에 새로운 값을 삽입하는 방식으로 알고리즘을 처리한다. 이 방식의 단점은 먼저 어떤 캐시의 위치가 가장 오래 참조를 하지 않았는지 표시를하는 방식이 필요로 한다. 
+  LRU 캐시의 단점은 위 그림과 같은 방식으로 캐시가 처리가 되며 가장 오래 참조하지 않는 캐시의 위치에 새로운 값을 삽입하는 방식으로 알고리즘을 처리한다. 이 방식의 단점은 먼저 어떤 캐시의 위치가 가장 오래 참조를 하지 않았는지 표시를하는 방식이 필요로 한다. 
   
 ---
 ## 3. LRU Cache Structure in LevelDB
@@ -48,7 +49,9 @@ LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 
 Check leveldb_release/build/util/cache.cc !!!
 
-![화면 캡처 2022-08-28 093945](https://user-images.githubusercontent.com/84978165/187053474-6c5b547b-871d-462d-8c64-36bf4ab7020e.jpg)
+<p align="center">
+<img width="700" src="https://user-images.githubusercontent.com/84978165/187053474-6c5b547b-871d-462d-8c64-36bf4ab7020e.jpg">
+</p>
 
 (1) LevelDB내에서 Cache는 LRU Cache 16개를 구성하고 있는 ShardeLRUCache
 
