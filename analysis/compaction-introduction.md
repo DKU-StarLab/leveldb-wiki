@@ -1,4 +1,4 @@
-# compaction 
+# Compaction 
  > Compaction은  db에서 가장 복잡한 프로세스 중 하나이며 db의 성능에 큰 영향을 주기도 합니다.
 
  > 내부 데이터 중첩 및 통합 메커니즘이며 읽기 및 쓰기 속도의 균형을 맞추는 효과적인 수단이기도 합니다.
@@ -33,5 +33,6 @@ compaction이 없으면  level 1 ~ N 까지(level 0 제외)의 key 원자성을 
 etc.
 
 ## Compaction Code Flow
+
 ![image](https://user-images.githubusercontent.com/86946575/188067273-44e604d2-3f74-49fc-90a1-da5959d06dac.png)
 
