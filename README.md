@@ -3,7 +3,7 @@
 학생들이 스터디를 통해 LevelDB를 공부한 내용을 정리하여 작성한 문서입니다.
 
 이 문서는 LevelDB의 배경, 구조, 분석 그리고 분석하는 방법에 대해 설명합니다.  
-DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https://sslab.dankook.ac.kr/leveldb-wiki-home/)으로 편하게 읽어보실 수 있습니다.
+DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https://sslab.dankook.ac.kr/leveldb-wiki/)으로 편하게 읽어보실 수 있습니다.
 
 문서 내용에 오류가 있거나, 추가사항이 있으시다면 언제든지 Pull Request를 통해 기여해주시면 감사하겠습니다.
 
@@ -28,20 +28,23 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 ### LevelDB 코드 분석
 0. Overall
 1. Key-Value Interface
-2. [WAL](./analysis/wal.md)
-3. [Memtable](./analysis/memtable.md)
-4. [Compaction](./analysis/compaction.md)
-5. [SSTable](./analysis/sstable.md)
+2. [WAL]
+3. [Memtable]
+4. [Compaction]
+5. SSTable
+    - [SSTable Format](./analysis/sstable.md)
+    - [SSTable Write](./analysis/sstable-write.md)
+    - [SSTable Read](./analysis/sstable-read.md)
 6. [Bloom Filter](./analysis/bloomfilter.md)
-7. [Cache](./analysis/cache.md)
-8. [Manifest](./analysis/manifest.md)
+7. [Cache]
+8. [Manifest]
 9. LevelDB db_bench
 
 ### 벤치마크 실험 분석
-- [WAL](./benchmarks/wal.md)
-    - 실험 1
-    - 실험 2
-    - 실험 3
+- WAL
+    - [실험 1](./benchmarks/wal_1.md)
+    - [실험 2](./benchmarks/wal_2.md)
+    - [실험 3](./benchmarks/wal_3.md)
 - [Memtable](./benchmarks/memtable.md)
 - [Compaction](./benchmarks/compaction.md)
 - [SSTable](./benchmarks/sstable.md)
@@ -50,12 +53,12 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 
 ### YCSB 튜닝 대회
  - [워크로드 및 대회 소개](https://github.com/DKU-StarLab/leveldb-study/blob/main/tuning/README.md)
- - Team SSTable 레포트
- - Team Bloom Filter 레포트
- - Team WAL/Manifest 레포트
- - Team Memtable 레포트
- - Team Cache 레포트
- - Team Compaction 레포트
+ - [Team SSTable 레포트](./tuning/%5BTuning%5Dteam_SSTable_report.md)
+ - [Team Bloom Filter 레포트](./tuning/%5BTuning%5Dteam_bloomfilter_report.md)
+ - [Team WAL/Manifest 레포트](./tuning/%5BTuning%5Dteam_WAL%2CManifest_report.md)
+ - [Team Memtable 레포트](./tuning/%5BTuning%5Dteam_memtable_report.md)
+ - [Team Cache 레포트](./tuning/%5BTuning%5Dteam_cache_report.md)
+ - [Team Compaction 레포트](./tuning/%5BTuning%5Dteam_Compaction_report.md)
 
 
 ### 부록
@@ -71,7 +74,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
 ## 사진
-<img src="./image/photo.png" width="70%">
+<img src="./image/photo.png" width="100%">
 
 ## 포스터
 <img src="./image/poster_kor.png" width="50%">

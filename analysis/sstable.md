@@ -1,7 +1,8 @@
 # SSTable 
 LevelDB는 LSM트리(Log Structured Merge Tree)를 기반으로 만들어졌으며, 이 때문에 write를 할 때 데이터를 디스크에 직접 쓰는게 아니라 Log에 처음 쓰고 MemTable에 쓰게 된다. MemTable은 데이터가 꽉 차면 Immutable MemTable로 데이터를 보내고, Immutable MemTable에선 storage(즉 disk)로 `flush`를 하게 된다.
 
-이렇게 메모리의 데이터가 storage로 `flush`될때 levelDB는 데이터를 SSTable이라는 자료구조에 담아 보관하며, 이 글에선 이 SSTable에 대해 다룬다.  
+이렇게 메모리의 데이터가 storage로 `flush`될때 levelDB는 데이터를 SSTable(Sorted String Table)이라는 자료구조에 담아 보관하며, 이 글에선 이 SSTable에 대해 다룬다.  
+<br/>  
 
 ## SSTable format  
 SSTable은 물리적으론 4KB짜리의 블록들로 나뉘며, 각 블록들은 데이터를 저장하는 필드 외에 압축 유형(블록에 저장된 데이터가 압축됐는지, 압축됐다면 어떤 알고리즘으로 압축했는지를 나타냄)과 CRC 확인(데이터에 오류가 있는지)을 위한 필드가 있다.  
@@ -10,241 +11,79 @@ SSTable은 물리적으론 4KB짜리의 블록들로 나뉘며, 각 블록들은
 
 <p align="center"><img src="https://user-images.githubusercontent.com/65762283/182532427-47d356d8-c3a7-4d72-b8df-f3adcb75bcbe.png"></p>  
 
-- Data Block : Key-Value Pair를 저장하는데 사용되는 블록
-- Filter Block : Bloom Filter들을 가지는 블록. Bloom Filter들의 개수는 Data Block의 개수와 같음
-- Meta Index Block : Filter Block의 Index정보를 갖는 블록
-- Index Block : 각 Data Block들의 Index정보를 갖는 블록
-- Footer : Meta Index Block과 Index Block의 Index정보를 갖는 블록
+<br/>  
 
-## Write
-SSTable은 다음과 같은 상황에서 만들어진다.  
+### Data Block  
+Key-Value Pair들이 저장되는 블록이다. 구조는 다음과 같다.  
 
-1. MemTable로부터 `Flush(Minor Compaction)`가 일어날 때
-2. Storage에서 `Compaction`이 일어날 때  
-<br>  
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187910209-7d931fb7-6870-45e2-ade4-f0316cb25c72.png"></p>  
 
-### MemTable로부터 Flush가 일어날 때  
-이 때 MemTable로부터 `Flush`가 일어나는 과정은 다음과 같다.
+SSTable은 key들을 정렬된 형태로 가지고 있기 때문에 각각의 key들은 서로 겹치는 부분들을 많이 가질 수 있게 된다. LevelDB는 이런 문제점으로부터 공간상의 효율을 위해 key를 저장할 때 전체 Key값을 저장하는 게 아니라 이전 레코드의 key와 겹치지 않는 부분(공유하지 않는 부분이라고 표현하며, 정확히 말하자면 이전 레코드의 key와 공유하는 접두사를 제외한 뒷부분)만 저장하도록 설계했다.  
 
-<p align="center"><img src="https://user-images.githubusercontent.com/65762283/183543614-97c2176c-1736-4ea7-9fa7-26e67aea829b.png"></p>  
+이러한 방식은 Key-Value Pair를 저장할 때 key를 저장하기 위해 쓰이는 부분이 줄어들기 때문에 메모리 절약이 가능하다는 장점이 있다. 그러나 SSTable이 내부적으론 key들을 정렬된 형태로 가지고 있어 원래대로라면 Binary Search를 통한 탐색이 가능함에도 불구하고, 이런 방식은 각 Entry들이 key값을 전체 값이 아닌 일부 값만 가지기 때문에 Binary Search를 제대로 사용할 수 없어 읽기 성능이 안 좋아진다는 단점이 있다.  
 
-`CompactMemTable`이 호출되고, 이로 인해 `WriteLevel0Table`이 호출되면서 SSTable이 만들어지는데 이 때 `BuildTable`이 실질적으로 SSTable을 만든다.  
+이런 문제점을 해결하고자 LevelDB는 `Restart Point`라는 개념을 도입했다. Data Block의 모든 Entry가 key값을 일부만 저장하도록 하는게 아니라 k개(디폴트는 16)의 Entry마다 전체 key값을 저장하도록 한 것이며, 이 때 전체 key값이 저장되는 Entry들을 `Restart Point`라고 한다. 위 그림에서 볼 수 있듯 Data Block은 내부적으로 각각의 `Restart Point`들의 위치를 별도로 저장한다.  
 
-`BuildTable`의 흐름은 다음과 같다.
+이렇게 `Restart Point`를 도입하여 k개의 레코드마다 전체 key값을 다시 쓰게 해줌으로써, Data Block 내부의 Entry들은 다음과 같이 `Restart Point`를 기준으로 일종의 구역들을 형성하게 된다.
 
-#### 전체 과정
-![Sequence 01](https://user-images.githubusercontent.com/65762283/183480267-03e4a024-06b0-4798-83d0-74c50a5d0f1a.gif) 
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187920060-32e4a102-a0e7-4929-8d59-6494f9f09ee8.png"></p> 
 
-#### 순서
-1. `TableBuilder` 인스턴스를 만든다  
-2. `TableBuilder`의 `Add`메소드를 통해 MemTable의 key-value pair들을 하나하나 추가한다.
-3. `TableBuilder`의 `Finish`메소드를 통해 SSTable을 만드는 과정을 마무리한다.
-4. `WritableFile`에 있는 내용들을 storage에 쓴다
-5. storage에 저장한 SSTable을 cache에 올려서 사용가능한지 확인해본다.
+이 때 SSTable이 내부적으로 key들을 정렬된 형태로 보관하므로, 각각의 `Restart Point`에 해당하는 Entry들도 서로 정렬된 형태를 가진다. 따라서 내가 찾고 있는 key가 있을 만한 구역을 `Restart Point`를 이용해 Binary Search로 찾아갈 수 있고 이를 이용해 read성능을 높일 수 있다.  
+<br/>  
 
-```cpp
-Status BuildTable(const std::string& dbname, Env* env, const Options& options,
-                  TableCache* table_cache, Iterator* iter, FileMetaData* meta) {
-  Status s;
-  meta->file_size = 0;
+### Filter Block  
+Bloom Filter들을 가지는 블록이다. 구조는 다음과 같다.  
 
-  // 이터레이터가 첫 요소를 가리키도록 함
-  iter->SeekToFirst();
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187955758-acd5f9e8-8d00-4ea4-898b-9773e5071b9b.png"></p> 
 
-  std::string fname = TableFileName(dbname, meta->number);
-  if (iter->Valid()) {
-    WritableFile* file;
-    s = env->NewWritableFile(fname, &file);
-    if (!s.ok()) {
-      return s;
-    }
+Filter는 Bloom Filter들을 말하며, Filter offset은 각 Filter들의 시작 offset정보를 가진다. Filter offset\`s offset은 Filter 1 offset의 offset정보를 가진다. 즉 Bloom Filter를 읽을 땐 Filter offset\`s offset을 먼저 읽고, 이를 토대로 원하는 Filter의 offset을 읽은 후 해당하는 Filter로 찾아가 읽게 된다.  
+<br/>  
 
-    // 1. TableBuilder 인스턴스를 만든다
-    TableBuilder* builder = new TableBuilder(options, file);
-    meta->smallest.DecodeFrom(iter->key());
-    Slice key;
+### Meta Index Block  
+Filter Block의 Index정보를 갖는 블록이다. 이와 관련된 하나의 레코드만 저장한다.  
+<br/>  
 
-    // 2. TableBuilder의 Add메소드를 통해 MemTable의 key-value pair들을 하나하나 추가한다.
-    for (; iter->Valid(); iter->Next()) {
-      key = iter->key();
-      builder->Add(key, iter->value());
-    }
-    if (!key.empty()) {
-      meta->largest.DecodeFrom(key);
-    }
+### Index Block  
+각 Data Block들의 Index정보를 갖는 블록이다. 구조는 다음과 같다.  
 
-    // 3. TableBuilder의 Finish메소드를 통해 SSTable을 만드는 과정을 마무리한다.
-    s = builder->Finish();
-    if (s.ok()) {
-      meta->file_size = builder->FileSize();
-      assert(meta->file_size > 0);
-    }
-    delete builder;
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187952948-860a8f3d-1b91-4ce0-b127-3b7a56b64008.png"></p>  
 
-    // 4. WritableFile에 있는 내용들을 storage에 쓴다
-    if (s.ok()) {
-      s = file->Sync();
-    }
-    if (s.ok()) {
-      s = file->Close();
-    }
-    delete file;
-    file = nullptr;
+각 Entry들은 해당하는 Data Block의 Index정보뿐만 아니라 Data Block의 size와 해당 Data Block에서 가장 큰 key값도 가진다.  
+<br/>  
 
-    if (s.ok()) {
-      // 5. storage에 저장한 SSTable을 cache에 올려서 사용가능한지 확인해본다.
-      Iterator* it = table_cache->NewIterator(ReadOptions(), meta->number,
-                                              meta->file_size);
-      s = it->status();
-      delete it;
-    }
-  }
+### Footer  
+48Byte의 고정된 크기를 가지며, Meta Index Block의 index정보와 Index Block의 Index정보를 갖는 블록이다. 구조는 다음과 같다.  
 
-  // 이터레이터 관련 오류 확인
-  if (!iter->status().ok()) {
-    s = iter->status();
-  }
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187959918-6f36b165-b598-4aed-8c88-72716c7d0179.png"></p>  
+<br/>  
 
-  if (s.ok() && meta->file_size > 0) {
-    // Keep it
-  } else {
-    env->RemoveFile(fname);
-  }
-  return s;
-}
+### 참고 - Block Entry 구조
+Data Block, Index Block, Meta Index Block은 BlockBuilder라는 동일한 객체를 통해 만들기 때문에 이 Block들의 구조는 사실상 같다. 즉 Data Block뿐만 아니라 Index Block과 Meta Index Block도 `Restart Point`를 가지고 있다. Data Block이 Key-Value Pair를 저장하듯이 Index Block과 Meta Index Block도 일종의 Key-Vaue Pair를 저장하는 것이며 Index Block을 예로 들면 각 Entry의 Max key항목이 key역할을, offset과 length항목이 value역할을 한다.  
+
+이 Block들을 구성하는 Entry의 구조는 다음과 같다.  
+
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187917146-dcf4bd36-30b6-4406-ab15-ac461bb48f64.png"></p>  
+
+- Shared key length : 이전 레코드의 key와 겹치는 부분의 길이
+- Unshared key length : 이전 레코드의 key와 겹치지 않는 부분의 길이
+- Value length : value의 길이
+- Unshared key content : 이전 레코드의 key와 겹치지 않는 부분
+- Value : value값  
+
+#### ex)
 ```
+- restart_interval = 3
+- entry 1: key = abc, value = v1
+- entry 2: key = abe, value = v2
+- entry 3: key = abg, value = v3
+- entry 4: key = chesh, value = v4
+- entry 5: key = chosh, value = v5
+- entry 6: key = chush, value = v6
+```  
+<p align="center"><img src="https://user-images.githubusercontent.com/65762283/187968907-06fdea2b-b44c-4240-b529-c77a9f6112b8.png"></p>  
 
-#### TableBuilder::Add  
-> *TableBuilder안에 있는 각각의 BlockBuilder들에게 Iterator가 현재 참조하고 있는 key-value pair를 전달하는 역할을 한다.*  
+`restart_interval`을 3으로 지정하여 3개의 레코드마다 `Restart Point`가 찍히는 것을 볼 수 있고, 이 `Restart Point`에 해당하는 Entry들은 다른 레코드들과는 달리 전체 key값을 저장하는 모습을 볼 수 있다.  
 
-1. 현재 `BlockBuilder`로 만드는 Data Block이 비어있다면, 즉 새로운 Data Block을 구성하기 시작했다면 Index Block에 새 Entry를 추가한다. 이 때 추가되는 Entry는 현재 새로 만들기 시작한 Data Block에 대한 것이 아니라 바로 이전까지 만들던 Data Block에 대한 Entry이다.
-2. Bloom Filter를 사용하는 경우 Filter Block도 업데이트한다.
-3. Data Block에 데이터를 추가한다.
-4. 만약 작성 중인 Data Block이 꽉 찼다면(option으로 지정한 block size이상이 된 경우) `Flush`를 호출한다.  
-   
-```cpp
-void TableBuilder::Add(const Slice& key, const Slice& value) {
-  Rep* r = rep_;
-  
-  // ...생략
-
-  // 1. 현재 BlockBuilder로 만드는 Data Block이 비어있다면, Index Block에 새 Entry를 추가한다.
-  if (r->pending_index_entry) {
-    assert(r->data_block.empty());
-    r->options.comparator->FindShortestSeparator(&r->last_key, key);
-    std::string handle_encoding;
-    r->pending_handle.EncodeTo(&handle_encoding);
-    r->index_block.Add(r->last_key, Slice(handle_encoding));
-    r->pending_index_entry = false;
-  }
-
-  // 2. Bloom Filter를 사용하는 경우 Filter Block도 업데이트한다.
-  if (r->filter_block != nullptr) {
-    r->filter_block->AddKey(key);
-  }
-
-  r->last_key.assign(key.data(), key.size());
-  r->num_entries++;
-  // 3. Data Block에 데이터를 추가한다.
-  r->data_block.Add(key, value);
-
-  const size_t estimated_block_size = r->data_block.CurrentSizeEstimate();
-  // 4. 만약 작성 중인 Data Block이 꽉 찼다면 Flush를 호출한다.
-  if (estimated_block_size >= r->options.block_size) {
-    Flush();
-  }
-}
-```
-#### TableBuilder::Finish
-> *MemTable의 모든 key-valur pair들에 대해 `Add`가 끝났을 때 호출되며, 작성중인 SSTable을 마무리하는 역할을 한다.*
-
-1. `Flush`를 호출한다.
-2. Bloom Filter를 사용하는 경우 `WritableFile`에 FilterBlockBuilder로 Filter Block을 추가한다.
-3. `WritableFile`에 Meta Index Block을 추가한다.
-4. `WritableFile`에 `BlockBuilder`로 만들고 있던 Index Block을 추가한다.
-5. `WritableFile`에 Footer를 추가한다.  
-
-```cpp
-Status TableBuilder::Finish() {
-  Rep* r = rep_;
-  // 1. Flush를 호출한다.
-  Flush();
-  assert(!r->closed);
-  r->closed = true;
-
-  BlockHandle filter_block_handle, metaindex_block_handle, index_block_handle;
-
-  // 2. Bloom Filter를 사용하는 경우 WritableFile에 Filter Block을 추가한다.
-  if (ok() && r->filter_block != nullptr) {
-    WriteRawBlock(r->filter_block->Finish(), kNoCompression,
-                  &filter_block_handle);
-  }
-
-  // 3. WritableFile에 Meta Index Block을 추가한다.
-  if (ok()) {
-    BlockBuilder meta_index_block(&r->options);
-    if (r->filter_block != nullptr) {
-      std::string key = "filter.";
-      key.append(r->options.filter_policy->Name());
-      std::string handle_encoding;
-      filter_block_handle.EncodeTo(&handle_encoding);
-      meta_index_block.Add(key, handle_encoding);
-    }
-
-    WriteBlock(&meta_index_block, &metaindex_block_handle);
-  }
-
-  // 4. WritableFile에 Index Block을 추가한다.
-  if (ok()) {
-    if (r->pending_index_entry) {
-      r->options.comparator->FindShortSuccessor(&r->last_key);
-      std::string handle_encoding;
-      r->pending_handle.EncodeTo(&handle_encoding);
-      r->index_block.Add(r->last_key, Slice(handle_encoding));
-      r->pending_index_entry = false;
-    }
-    WriteBlock(&r->index_block, &index_block_handle);
-  }
-
-  // 5. WritableFile에 Footer를 추가한다.
-  if (ok()) {
-    Footer footer;
-    footer.set_metaindex_handle(metaindex_block_handle);
-    footer.set_index_handle(index_block_handle);
-    std::string footer_encoding;
-    footer.EncodeTo(&footer_encoding);
-    r->status = r->file->Append(footer_encoding);
-    if (r->status.ok()) {
-      r->offset += footer_encoding.size();
-    }
-  }
-  return r->status;
-}
-```
-
-#### TableBuilder::Flush
-> *BlockBuilder로 만들고 있는 Data Block을 storage에 쓰는 역할을 한다.*
-
-1. `BlockBuilder`로 만들고 있는 Data Block의 contents를 `WritableFile`에 추가한다.
-2. `WritableFile`에 쓴 내용을 storage에 쓴다.
-3. Bloom Filter를 사용할 경우 새 Bloom Filter를 만든다.  
-
-```cpp
-void TableBuilder::Flush() {
-  Rep* r = rep_;
-  
-  // ...생략
-
-  // 1. BlockBuilder로 만들고 있는 Data Block의 contents를 WritableFile에 추가한다.
-  WriteBlock(&r->data_block, &r->pending_handle);
-  if (ok()) {
-    r->pending_index_entry = true;
-    // 2. WritableFile에 쓴 내용을 storage에 쓴다.
-    r->status = r->file->Flush();
-  }
-  // 3. Bloom Filter를 사용할 경우 새 Bloom Filter를 만든다. 
-  if (r->filter_block != nullptr) {
-    r->filter_block->StartBlock(r->offset);
-  }
-}
-```
+## SSTable - Write & Read 
+[Write - SSTable이 만들어지는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/SSTable/analysis/sstable-write.md)  
+[Read - SSTable에서 key를 찾는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/SSTable/analysis/sstable-read.md)  
