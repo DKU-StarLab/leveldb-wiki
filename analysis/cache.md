@@ -41,7 +41,8 @@
 LevelDB의 Cache Structure를 파악하기 위하여 git clone을 통해 소스코드를 분석하였다.
 
 (source code download)
-git clone --recurse-submodules https://github.com/google/leveldb.git  leveldb_release
+  
+    git clone --recurse-submodules https://github.com/google/leveldb.git  leveldb_release
 
 LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 
