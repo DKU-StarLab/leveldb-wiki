@@ -81,11 +81,11 @@ LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 <br />
 
 #### <span style="color:red">(2)</span> LRUCache : LRUCache의 각 Item들은 LRUHandle이며 이는 <span style="color:red">(3)</span> LRUHandle 에서 후술한다. 
-#### 또한 LRUcCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
+#### 또한 LRUCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
 
 <br/>
 
-아래 3 요소는 Cache를 이루는 두 Double Linked List와 HashTable이다.
+아래 3 요소는 LRUCache를 이루는 두 Double Linked List와 HashTable이다.
 
 
     LRUHandle lru_; // (5)에서 후술
@@ -124,7 +124,7 @@ LRUHandle의 구성요소:
 #### <span style="color:red">(4)</span> HandleTable : 구현은 매우 간단한 해시 테이블로 되어있다.
 
 <p align="center">
-<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188283713-c8efe119-ec9c-4507-a8a6-b618403d6e42.png">
+<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188291092-8b674772-0cb1-4fb8-abcc-e6b75164b9bc.png">
 </p>
 
 코드상에서 list_라는 이중 포인터를 선언하여 LRUHandle 객체를 관리한다.
