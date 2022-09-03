@@ -77,6 +77,6 @@
 > key/value size가 각각 compaction 에 영향을 준다는 가설을 토대로 실험을 진행하였습니다.  
 > fillrandom의 경우, value size가 증가함에 따라 compaction 해야할 value가 많아지기 때문에 throughput은 감소하고 WAF, latency, compaction latency는 점점 증가하는 것을 알 수 있었습니다.  
 > readrandom의 경우도 한번에 읽어야하는 value 가 많아지기 때문에 latency가 점점 증가하는 것을 알 수 있었습니다.  
-> fillrandom의 경우에서 key size가 증가함에 따라 나오는 결과가 특이했습니다. key size 가 증가하면서 그 크기 안에 들어가는 key의 수는 동일한 데 size가 커졌기 때문에 key range는 더 커집니다(아래그림 참조). 따라서 compaction trigger 될때 메모리에 올리고 merge sort 후 다시 디스크에 내리는 크기가 늘어나기 때문에 latency, compaction latency 가 증가한 것으로 판단되고, key range 가 커졌지만 그 range 안에 들어가 있는 key의 수는 동일하기 때문에 더 빠르게 쓰기를 처리할 수 있어 WAF 감소하고, throughput는 증가하는 것으로 판단했습니다.
+> fillrandom의 경우에서 key size가 증가함에 따라 나오는 결과가 특이했습니다. key size 가 증가하면서 그 크기 안에 들어가는 key의 수는 동일한 데 size가 커졌기 때문에 key range는 더 커집니다(아래그림 참조). 따라서 compaction trigger 될때 메모리에 올리고 merge sort 후 다시 디스크에 내리는 크기가 늘어나기 때문에 latency, compaction latency 가 증가한 것으로 판단되고, key range 가 커졌지만 그 range 안에 들어가 있는 key의 수는 동일하기 때문에 겹치는 범위는 동일한데 한번에 더 많은 범위에 대한 쓰기 처리가 가능하여 WAF가 감소하고, throughput는 증가하는 것으로 판단했습니다.
 
 ![image](https://user-images.githubusercontent.com/106041072/188073166-66f5514e-cc06-4131-bc36-67a923b129da.png)
