@@ -139,7 +139,7 @@ LRUHandle의 구성요소:
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188284416-8d24b765-0996-4af6-ac16-97fcea285223.png">
 </p>
 
-#### *위의 LRUHandle과 같은 그림이다.
+#### <p align="center">위의 LRUHandle과 같은 그림이다.</p>
 
 아래는 클래스 HandleTable에 대한 LRUHandle 메소드들의 정의이다.
 
