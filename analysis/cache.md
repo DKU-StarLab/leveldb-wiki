@@ -69,7 +69,7 @@ LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 
 <br />
 
-#### <span style="color:red">(1)</span> ShardedLRUCache : LevelDB내에서 ShardedLRUCache는 내부에 LRU Cache 16개를 구성하고 있으며(위 그림에서 LRU Cache는 원래 16개여야 한다) 외부 LRUCache로 정의한다.
+#### <span style="color:red">(1)</span> ShardedLRUCache : LevelDB내에서 ShardedLRUCache는 내부에 LRU Cache 16개를 구성하고 있으며 외부 LRUCache로 정의한다.
 
 ### +Sharded란?
 용량 이슈의 이유로 DB Level에서 한 데이터베이스의 데이터들을 다수의 데이터베이스에 분산 저장하는 기법
@@ -81,11 +81,11 @@ LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 <br />
 
 #### <span style="color:red">(2)</span> LRUCache : LRUCache의 각 Item들은 LRUHandle이며 이는 <span style="color:red">(3)</span> LRUHandle 에서 후술한다. 
-#### 또한 LRUCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
+#### 또한 LRUcCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
 
 <br/>
 
-아래 3 요소는 LRUCache를 이루는 두 Double Linked List와 HashTable이다.
+아래 3 요소는 Cache를 이루는 두 Double Linked List와 HashTable이다.
 
 
     LRUHandle lru_; // (5)에서 후술
@@ -124,7 +124,7 @@ LRUHandle의 구성요소:
 #### <span style="color:red">(4)</span> HandleTable : 구현은 매우 간단한 해시 테이블로 되어있다.
 
 <p align="center">
-<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188291092-8b674772-0cb1-4fb8-abcc-e6b75164b9bc.png">
+<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188283713-c8efe119-ec9c-4507-a8a6-b618403d6e42.png">
 </p>
 
 코드상에서 list_라는 이중 포인터를 선언하여 LRUHandle 객체를 관리한다.
@@ -139,7 +139,7 @@ LRUHandle의 구성요소:
 <img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188284416-8d24b765-0996-4af6-ac16-97fcea285223.png">
 </p>
 
-#### <p align="center">위의 LRUHandle과 같은 그림이다.</p>
+#### *위의 LRUHandle과 같은 그림이다.
 
 아래는 클래스 HandleTable에 대한 LRUHandle 메소드들의 정의이다.
 
@@ -186,7 +186,7 @@ LRUHandle의 구성요소:
 
 **_<span style="background-color:#808080">LevelDB에서 Cache의 메커니즘_**
 
-LevelDB에서 Cache는 읽기 작업과 함께 Cache에 대한 메커니즘이 확인이 가능하다.
+LevelDB에서 Cache는 읽기 작업과 함께 Cache에 대한 메커니즘이 확인이 가능하며 아래는 그에 대한 개략도이다.
 
 <p align="center">
 <img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290416-f01c0e2a-ddb1-4eae-b10f-8055b7df8d5c.png">
@@ -231,7 +231,7 @@ LevelDB에서 Cache는 읽기 작업과 함께 Cache에 대한 메커니즘이 �
 <br/>
 <br/>
 
-이후 TableCache::Get 호출 -> **_<span style="background-color:#808080">LevelDB에서 Cache의 이용_**
+Version::Get함수에서 Table을 읽기 위해 TableCache::Get을 호출 -> **_<span style="background-color:#808080">LevelDB에서 Cache의 이용_**
 
 ---
 
@@ -239,14 +239,14 @@ LevelDB에서 Cache는 읽기 작업과 함께 Cache에 대한 메커니즘이 �
 
 * TableCache::Get, 본격적인 Cache를 이용한 읽기 작업을 수행하는 부분이다.
 
-TableCache::Get:
+TableCache::Get 소스코드:
 
     Cache::Handle* handle = nullptr;
 
     <1> Status s = FindTable(file_number, file_size, &handle);
     
     if (s.ok()) {
-      <2> 
+    <2> 
       Table* t = reinterpret_cast<TableAndFile*>(cache_->Value(handle))->table;
 
       s = t->InternalGet(options, k, arg, handle_result);
@@ -261,25 +261,28 @@ TableCache::Get:
 +LevelDB에는 TableCache와 BlockCache 두 가지의 다른 캐시가 도입되어 있다.
 
 
-#### TableCache 이용(FindTable) : 파일에 해당하는 테이블을 캐시에서 찾는다. 발견되지 않을 경우 파일을 먼저 오픈한 후 파일에 해당하는 테이블을 생성하여 캐시에 추가한다.
+#### <1> TableCache 이용(FindTable) : 파일에 해당하는 테이블을 캐시에서 찾는다. 발견되지 않을 경우 파일을 먼저 오픈한 후 파일에 해당하는 테이블을 생성하여 캐시에 추가한다.
 
 아래는 TableCache의 구조이다.
 
 
 <p align="center">
-<img width="896" alt="image" src="https://user-images.githubusercontent.com/84978165/188290917-4f120d0d-0132-46f5-ad36-3c37b4c62769.png">
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/84978165/188290917-4f120d0d-0132-46f5-ad36-3c37b4c62769.png">
 </p>
 
+*key*값은 file_number로 SSTable의 파일 이름이다.
+ 
+*value*값은 두 섹션으로 나뉘어진다.
+
+*RandomAccessFile**: 디스크에서 열린 SSTable에 대한 포인터이다.
+
+*Table**: 메모리에 있는 SSTable 파일에 해당하는 Table 구조에 대한 포인터로, 메모리에 있는 테이블 구조로 SSTable의 인덱스 내용과 블록 캐시를 나타내는 cache_id를 저장한다.
+
+
 <br>
 <br>
 
-부가 설명
-
-
-<br>
-<br>
-
-#### BlockCache 이용(InternalGet -> BlockReader) : SSTable에서 Key를 찾는 논리를 구현하는 InternalGet 함수는 BlockReader를 호출한다. 
+#### <2> BlockCache 이용(InternalGet -> BlockReader) : SSTable에서 Key를 찾는 논리를 구현하는 InternalGet 함수는 BlockReader를 호출한다. 
 #### 블록 캐시에서 블록을 찾고 발견되지 않을 경우 파일을 오픈한 후 읽어들인 뒤 블록 캐시에 블록을 추가한다.
 
 * BlockReader의 Cache 사용 알고리즘:
@@ -294,17 +297,29 @@ TableCache::Get:
 아래는 BlockCache의 구조이다.
 
 <p align="center">
-<img width="694" alt="image" src="https://user-images.githubusercontent.com/84978165/188290995-f6730c28-1a67-4aaa-b7b0-667a6c5025e8.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290995-f6730c28-1a67-4aaa-b7b0-667a6c5025e8.png">
 </p>
 
+*key*값은 각 SSTable 파일의 offset에 고유한 cache_id를 조합하여 구성되어 있다.
+
+이는 다른 각각의 SSTable 파일의 block_offset이 동일할 수 있으므로 구별하기 위함이다.
+
+<br>
+
+*value*값은 열린 SSTable 파일의 Data block들로 구성되어 있다.
+
+<br>
+<br>
 <br>
 <br>
 
-부가 설명
+BlockReader함수를 통해 Block Cache에 Lookup하고 Insert하는 작업이 끝나고 나면 읽기 작업을 통해 Cache를 이용하는 작업이 끝나게 된다. 
 
-<br>
-<br>
+아래의 Cache 이용 개략도를 통해 위에서 쭉 설명한 LevelDB에서 Cache 이용의 흐름을 다시 파악할 수 있다.
 
+<p align="center">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290416-f01c0e2a-ddb1-4eae-b10f-8055b7df8d5c.png">
+</p>
 
 ---
 
