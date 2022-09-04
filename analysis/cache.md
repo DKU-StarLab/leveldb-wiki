@@ -5,13 +5,12 @@
   - [2. What is LRU](#2-what-is-lru)
   - [3. LRU Cache Structure in LevelDB](#3-lru-cache-structure-in-leveldb)
   - [4. Overrall Cache Flow](#4-overrall-cache-flow)
-  - [5. Cache Source Code Analysis](#5-cache-source-code-analysis)
 ---
 ## 1. What is Cache
 
  캐시는 하드웨어의 한 장치로서 메인 메모리나 디스크에 접근을 하기 이전에 거치는 메모리 저장 장치이다. 
   
-캐시의 장점은 먼저 접근하는 속도가 굉장히 느린 메인 메모리에 비해서 접근 속도가 굉장히 빨라서 메인 메모리의 값을 미리 저장을 해두어서 하웨어의 처리 속도를 굉장히 효율적으로 줄이는게 가능하다. 
+캐시의 장점은 먼저 접근하는 속도가 굉장히 느린 메인 메모리에 비해서 접근 속도가 굉장히 빨라서 메인 메모리의 값을 미리 저장을 해두어서 하드웨어의 처리 속도를 굉장히 효율적으로 줄이는게 가능하다. 
   
 하지만 캐시의 가장 큰 단점은 빠른 접근 속도로 인한 하드웨어의 비싼 가격이다. 비싼 가격으로 인해 큰 용량을 캐시에서는 사용하지 못하는 단점도 발생한다.
   
