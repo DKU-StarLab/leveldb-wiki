@@ -57,13 +57,16 @@ Iterator* DBImpl::NewInternalIterator(const ReadOptions& options,
 
   // Collect together all needed child iterators
   std::vector<Iterator*> list;
-  list.push_back(mem_->NewIterator());  //memtable iter
+  //memtable iter
+  list.push_back(mem_->NewIterator()); 
   mem_->Ref();
   if (imm_ != nullptr) {
-    list.push_back(imm_->NewIterator()); //imm iter
+    //imm iter
+    list.push_back(imm_->NewIterator()); 
     imm_->Ref();
   }
-  versions_->current()->AddIterators(options, &list);// level 0 ~ N iter
+  // level 0 ~ N iter
+  versions_->current()->AddIterators(options, &list);
   Iterator* internal_iter =
       NewMergingIterator(&internal_comparator_, &list[0], list.size());
   versions_->current()->Ref();
