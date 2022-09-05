@@ -30,7 +30,7 @@ DKU System Software Lab의 홈페이지에서 LevelDB wiki를 전자책으로 �
 1. Key-Value Interface
 2. [WAL](./analysis/wal.md)
 3. [Memtable](./analysis/memtable.md)
-4. Compaction(./analysis/compaction.md)
+4. Compaction
     - [Major-Compaction](./analysis/Major-Compaction.md)
 5. [SSTable](./analysis/sstable.md)
 6. [Bloom Filter](./analysis/bloomfilter.md)
