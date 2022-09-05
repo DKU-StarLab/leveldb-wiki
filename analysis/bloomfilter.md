@@ -1,4 +1,4 @@
->#1 블룸 필터란 무엇인가<br/>
+# #1 블룸 필터란 무엇인가<br/>
 <br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
@@ -27,7 +27,7 @@
    
    
   
->#2 False Positive
+# #2 False Positive
 
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424609-121954ba-8a0d-486e-83f5-c4102a669c8e.png)
@@ -176,7 +176,7 @@ false positive 자체는 덜 발생하였으나 이를 위한 더 많은 해시 
 <br/>
 <br/>
 
->#3 블룸 필터의 코드 분석
+# #3 블룸 필터의 코드 분석
 
  
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425832-0ca0a6f6-a8d4-471b-8765-44a3ccad1904.png)
@@ -387,7 +387,7 @@ or  대신 and 연산을 사용하여 필터 내부에 특정 key 값이 존재�
 <br/>
 
 
- >#4 Write를 할 때의 코드 흐름
+ # #4 Write를 할 때의 코드 흐름
 
  
 
@@ -485,7 +485,7 @@ BGWork()가 아닌 NeedsCompaction()이 수행되어 블룸 필터가 생성되�
 <br/>
 <br/>
 
->#5 Read를 할 때의 코드 흐름
+# #5 Read를 할 때의 코드 흐름
 
 ![img](https://user-images.githubusercontent.com/101636590/187571334-4c1d3c8d-77e1-4824-8338-45dcf735d4c1.png)
 db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
