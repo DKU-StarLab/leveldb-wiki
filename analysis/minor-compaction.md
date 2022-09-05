@@ -18,7 +18,8 @@ Minor Compaction의 기능을 수행하는 함수는 **DBImpl::WriteLevel0Table*
 void DBImpl::BackgroundCompaction() {
 ...
 
-  if (imm_ != nullptr) {  // Immmutable mematble 비여 있지 않은 상태면 
+//if  Immmutable mematble not empty
+  if (imm_ != nullptr) { 
     CompactMemTable();    
     return;
   }
@@ -35,27 +36,29 @@ void DBImpl::CompactMemTable() {
 
   // Save the contents of the memtable as a new Table
   VersionEdit edit;
-  Version* base = versions_->current(); //현재 version 호출
+  Version* base = versions_->current();
   base->Ref();
-  // 핵심
-  Status s = WriteLevel0Table(imm_, &edit, base); // WriteLevel0Table 함수 호출
+  // call function WriteLevel0Table
+  Status s = WriteLevel0Table(imm_, &edit, base); 
   base->Unref();
 
-  if (s.ok() && shutting_down_.load(std::memory_order_acquire)) { // error 체크
+  // check error 
+  if (s.ok() && shutting_down_.load(std::memory_order_acquire)) { 
     s = Status::IOError("Deleting DB during memtable compaction");
   }
 
-  // Replace immutable memtable with the generated Table
+
   if (s.ok()) {
     edit.SetPrevLogNumber(0);
-    edit.SetLogNumber(logfile_number_);  // Earlier logs no longer needed
+    edit.SetLogNumber(logfile_number_);  
     s = versions_->LogAndApply(&edit, &mutex_);
   }
 
-  if (s.ok()) {  // mior compaction이 성공적으로 되었으면  
+  // if mior compaction is successful
+  if (s.ok()) {  
     // Commit to the new state
     imm_->Unref();
-    imm_ = nullptr;  // immutable memtable 비우기
+    imm_ = nullptr;  
     has_imm_.store(false, std::memory_order_release);
     RemoveObsoleteFiles();
   } else {
@@ -75,14 +78,16 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
   FileMetaData meta;
   meta.number = versions_->NewFileNumber();
   pending_outputs_.insert(meta.number);
-  Iterator* iter = mem->NewIterator(); // memtable의 iter를 생성
+  // memtable - iter
+  Iterator* iter = mem->NewIterator(); 
   Log(options_.info_log, "Level-0 table #%llu: started",
       (unsigned long long)meta.number);
 
   Status s;
   {
     mutex_.Unlock();
-    s = BuildTable(dbname_, env_, options_, table_cache_, iter, &meta); // sstable을  생성
+    // make sstable
+    s = BuildTable(dbname_, env_, options_, table_cache_, iter, &meta); 
     mutex_.Lock();
   }
 
@@ -92,8 +97,7 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
   delete iter;
   pending_outputs_.erase(meta.number);
 
-  // Note that if file_size is zero, the file has been deleted and
-  // should not be added to the manifest.
+
   int level = 0;
   if (s.ok() && meta.file_size > 0) {
     const Slice min_user_key = meta.smallest.user_key();
@@ -108,7 +112,8 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
   CompactionStats stats;
   stats.micros = env_->NowMicros() - start_micros;
   stats.bytes_written = meta.file_size;
-  stats_[level].Add(stats);  // stats에 결과를 저장
+  //save in stats
+  stats_[level].Add(stats);  
   return s;
 }
 
@@ -117,4 +122,4 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
 > compaction에 관한 code부분만  주석을 달았습니다.
 
 - ### MiNor Compaction 
-![image](https://user-images.githubusercontent.com/86946575/188069696-3c0dade6-1ae6-4569-8fc5-90c7cb4c9196.png)
+![image](https://user-images.githubusercontent.com/86946575/188358601-12514a26-0894-4ea7-bb99-de2c6028a82f.png)
