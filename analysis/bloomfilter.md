@@ -1,16 +1,21 @@
-# Bloom Filter <br/>
+# Bloom Filter 
+<br/>
 <br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
-(출처:https://en.wikipedia.org/wiki/Bloom_filter)
+(출처:https://en.wikipedia.org/wiki/Bloom_filter) 
+
+<br>
 
 블룸 필터는 데이터 블록에 특정 key의 데이터가 존재하는지 확인할 수 있는 확률적 자료 구조이다.
 
-블룸 필터는 데이터를 Write를 할 때에 각각의 key에 k개의 해시 함수를 수행하여 각 key 마다 k개의 해시 값을 얻고,
+블룸 필터는 데이터를 Write를 할 때에, 각각의 key에 k개의 해시 함수를 수행하여 각 key 마다 k개의 해시 값을 얻고,
 
 해당 값에 해당하는 블룸 필터 배열 칸들의 값을 0에서 1로 수정하여 해당 key가 데이터 블록에 존재함을 나타낸다.
 
-그럴경우 반대로 Read를 할 때엔 데이터 블록을 하나하나 전부 읽는 대신
+<br>
+
+반대로 Read를 할 때엔 데이터 블록을 하나하나 전부 읽는 대신
 
 읽으려는 데이터에 동일한 k개의 해시 함수를 수행하여 k개의 해시 값을 얻고
 
@@ -22,15 +27,19 @@
 
 (출처:https://leveldb-handbook.readthedocs.io/zh/latest/)
 
+<br>
+
 하나의 sstable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
 
-필터 블록엔 n개의 블룸 필터 배열이, 메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 필터인지 저장한다.<br>
+필터 블록엔 n개의 블룸 필터 배열이, 
+
+메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 배열인지 저장한다.<br>
   
   <br><br><br><br>
    
    
   
-# False Positive
+# True Negative & False Positive
 
 
 ![1604747913941](https://user-images.githubusercontent.com/101636590/188339451-c0638280-3882-4883-8396-d23c88008068.png)
@@ -106,11 +115,13 @@ explicit BloomFilterPolicy(int bits_per_key) : bits_per_key_(bits_per_key) {
 
 또한 해시 함수의 개수 K의 경우 K = ln2 * (M/N) = ln2 * B이란 수식을 사용한다.
 
-이것은 수학적으로 증명된, 블룸 필터의 false positive 발생률을 최소한으로 줄일 수 있는 값이다.
-
-이에 관한 더 자세한 증명은 https://d2.naver.com/helloworld/749531 해당 글을 참조하면 좋을 것이다.
+이것은 수학적으로 증명된, 블룸 필터의 false positive 발생률을 최소한으로 줄일 수 있는 값이며
 
 이 역시 bloom.cc 파일의 코드에서 구현되어 있는 것을 확인할 수 있다.
+
+(이에 관한 더 자세한 증명은 https://d2.naver.com/helloworld/749531 해당 글을 참조)
+
+
 
 <br/>
 <br/>
