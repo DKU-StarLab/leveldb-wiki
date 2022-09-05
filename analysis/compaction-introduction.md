@@ -13,7 +13,7 @@ compaction이 없으면  level 1 ~ N 까지(level 0 제외)의 key 원자성을 
 
 ## Compaction Type
 ### 1. Minor Compaction
-- In Level db call “Flush”
+
 
 ![image](https://user-images.githubusercontent.com/86946575/181177580-415e1214-edfc-4180-b072-b36b8827ca1f.png)
 
@@ -22,15 +22,10 @@ compaction이 없으면  level 1 ~ N 까지(level 0 제외)의 key 원자성을 
 ![image](https://user-images.githubusercontent.com/86946575/181178432-ba39014c-a4a7-4d2e-ad15-5333109bdb22.png)
 
 ### 2. Major Compaction
-- In Level db call “Compaction”
-- Leveled Compaction
+
 
 ![image](https://user-images.githubusercontent.com/86946575/181183259-327818ac-1a2d-4e0e-91c9-24bc99cd1c3b.png)
 
-### Another
-- Tiered Compaction
-- FIFO Conpaction
-etc.
 
 ## Compaction Code Flow
 
