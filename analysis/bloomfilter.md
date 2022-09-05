@@ -128,14 +128,24 @@ explicit BloomFilterPolicy(int bits_per_key) : bits_per_key_(bits_per_key) {
 <br/>
 <br/>
  
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424987-d8a58b47-0e68-4f13-b3d1-bc7ea413406a.png)
 
+![image](https://user-images.githubusercontent.com/101636590/188341669-1192eb93-3234-463d-8958-bb142251287e.png) <br>
+![image](https://user-images.githubusercontent.com/101636590/188341828-490d75b7-17b1-455d-acba-ecabfb06dad3.png) <br>
+![image](https://user-images.githubusercontent.com/101636590/188341913-5b0f489f-294a-4d5c-8171-d0ae7fa895cc.png) 
+
+<br>
 
 False positive가 발생할 확률을 수학적으로 정리하면 위와 같으며,
 
-이를 e의 정의를 통해 정리하면 오른쪽과 같은 식이 나온다.
+이를 e의 정의를 통해 정리하면 오른쪽 아래와 같은 식으로 표현할 수 있다.
 
-여기서 k의 값이 ln2 * (m/n)이라면 해당 식은 (1/2)^k의 꼴로 정리되므로,
+<br>
+
+여기서 k의 값이 ln2 * (m/n)이라면 ( = kn/m 값이 ln2라면)
+
+해당 식은 (1/2)^k의 형태로 정리되므로,
+
+<br>
 
 해당 값이 false positive 발생 확률을 가장 최소화 시킬 수 있는 최적의 수치이며
 
