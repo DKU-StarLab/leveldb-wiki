@@ -48,8 +48,40 @@ MergingIterator는 이름에서 알수있 듯이 Iterator들의 Merge 입니다.
 
 
 ***MergingIterator*** 는 code 상 Iterator type의 vector을 생성하여 ***memtable ,Level 0 ,level 1 ~ N***  순선대로 넣어서 사용합니다.
-![image](https://user-images.githubusercontent.com/86946575/188079477-709ffe0d-4437-4d08-aec6-612ec53031fe.png)
+```c++
+Iterator* DBImpl::NewInternalIterator(const ReadOptions& options,
+                                      SequenceNumber* latest_snapshot,
+                                      uint32_t* seed) {
+  mutex_.Lock();
+  *latest_snapshot = versions_->LastSequence();
+
+  // Collect together all needed child iterators
+  std::vector<Iterator*> list;
+  list.push_back(mem_->NewIterator());  //memtable iter
+  mem_->Ref();
+  if (imm_ != nullptr) {
+    list.push_back(imm_->NewIterator()); //imm iter
+    imm_->Ref();
+  }
+  versions_->current()->AddIterators(options, &list);// level 0 ~ N iter
+  Iterator* internal_iter =
+      NewMergingIterator(&internal_comparator_, &list[0], list.size());
+  versions_->current()->Ref();
+
+  IterState* cleanup = new IterState(&mutex_, mem_, imm_, versions_->current());
+  internal_iter->RegisterCleanup(CleanupIteratorState, cleanup, nullptr);
+
+  *seed = ++seed_;
+  mutex_.Unlock();
+  return internal_iter;
+}
+
+```
+
+
 ![image](https://user-images.githubusercontent.com/86946575/188080151-3ff12581-988d-4435-9a49-6bb2bf563da8.png)
 
 ### Iterator의  기능적 흐름도
 ![image](https://user-images.githubusercontent.com/86946575/188079392-ac5486f3-3dfd-4b32-b87c-7622c2c96835.png)
+
+그림출처:https://www.jianshu.com/p/9e63dea36af0
