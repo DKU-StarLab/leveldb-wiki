@@ -1,4 +1,4 @@
-
+# Bloom Filter - Read
 
 ![img](https://user-images.githubusercontent.com/101636590/187571334-4c1d3c8d-77e1-4824-8338-45dcf735d4c1.png)
 db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
@@ -13,28 +13,66 @@ db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
 <br/>
 <br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571403-87a6b37d-79d7-4316-8fcb-0be921793b05.png)
+```CPP
+if (method != nullptr) {
+        RunBenchmark(num_threads, name, method);
+      }
+```
 
 이때 RunBenchmark() 함수는 num_threads, name, method 3개의 파라미터를 필요로 하는데,
 
 <br/>
 <br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571432-9cd667da-2c20-4e5e-ab32-524c60a0f005.png)
+```CPP
+int num_threads = FLAGS_threads;
+```
 
 num_threads는 스레드의 갯수로 db_bench를 돌릴때 파라미터로 지정할 수 있다.
 
 <br/>
 <br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571446-87ebe70f-8ff6-4f80-b139-bc8e4992bc8c.png)
+```CPP
+const char* benchmarks = FLAGS_benchmarks;
+    while (benchmarks != nullptr) {
+      const char* sep = strchr(benchmarks, ',');
+      Slice name;
+      if (sep == nullptr) {
+        name = benchmarks;
+        benchmarks = nullptr;
+      } else {
+        name = Slice(benchmarks, sep - benchmarks);
+        benchmarks = sep + 1;
+      }
+      
+```
 
-Name은 벤치마크의 종류를 나타내는 문자열 변수이고,
+Name은 벤치마크의 종류를 나타내는 문자열 변수로
+
+파라미터에서 입력한 값들을 쉼표로 나누어 저장한다.
 
 <br/>
 <br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571476-2412be67-b288-4a32-9dda-09c1aaa5463e.png)
+```CPP
+void (Benchmark::*method)(ThreadState*) = nullptr;
+```
+
+
+```CPP
+      } else if (name == Slice("readseq")) {
+        method = &Benchmark::ReadSequential;
+      } else if (name == Slice("readreverse")) {
+        method = &Benchmark::ReadReverse;
+      } else if (name == Slice("readrandom")) {
+        method = &Benchmark::ReadRandom;
+      } else if (name == Slice("readmissing")) {
+        method = &Benchmark::ReadMissing;
+      } else if (name == Slice("readhot")) {
+        method = &Benchmark::ReadHot;
+      }
+```
 
 Method는 name에 해당하는 벤치마크 함수의 주소값을 저장하는 포인터 변수이다.
 
