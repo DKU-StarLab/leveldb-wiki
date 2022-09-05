@@ -2,9 +2,9 @@
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426584-f700c3df-935e-406d-a918-540a42c7635b.png)
 
 
-메인 함수 부터 간략하게 살펴보자면,
+db_bench를 실행할 때,
 
-Benchmark 클래스에서 클래스 변수 filterpolicy를 선언하고
+메인함수에서 Benchmark 클래스에서 클래스 변수 filterpolicy를 선언하고
 
 생성자 Benchmark()에서 해당 변수에 Bloomfilterpolicy 값을 채웠다.
 
