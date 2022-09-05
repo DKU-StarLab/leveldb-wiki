@@ -1,4 +1,4 @@
-# #5 Read를 할 때의 코드 흐름
+
 
 ![img](https://user-images.githubusercontent.com/101636590/187571334-4c1d3c8d-77e1-4824-8338-45dcf735d4c1.png)
 db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
@@ -7,9 +7,6 @@ db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
 
 해당 함수는 Write 과정을 처리하는 Open() 함수와 Read 과정을 처리하는 RunBenchmark()를 순서대로 실행한다.
 
-Open() 함수를 필두로 한 Write 과정을 설명하였으니
-
-이제 RunBenchmark() 함술를 필두로 한 Read 과정에 대해 살펴보자면,
 
 <br/>
 <br/>
@@ -18,7 +15,7 @@ Open() 함수를 필두로 한 Write 과정을 설명하였으니
 
 ![img](https://user-images.githubusercontent.com/101636590/187571403-87a6b37d-79d7-4316-8fcb-0be921793b05.png)
 
-해당 함수는 num_threads, name, method 3개의 파라미터를 필요로 하는데,
+이때 RunBenchmark() 함수는 num_threads, name, method 3개의 파라미터를 필요로 하는데,
 
 <br/>
 <br/>
