@@ -2,6 +2,7 @@
 <br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
+(출처:https://en.wikipedia.org/wiki/Bloom_filter)
 
 블룸 필터는 데이터 블록에 특정 key의 데이터가 존재하는지 확인할 수 있는 확률적 자료 구조이다.
 
@@ -17,7 +18,9 @@
 <br><br><br><br>
    
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424577-84d02a8f-c306-431f-b7b9-df92d3c2027b.png)
+![sstable_logic](https://user-images.githubusercontent.com/101636590/188339431-c3f219ba-b2f0-4bc5-bbcf-a39a8be35d85.jpg)
+
+(출처:https://leveldb-handbook.readthedocs.io/zh/latest/)
 
 하나의 sstable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
 
@@ -30,7 +33,9 @@
 # #2 False Positive
 
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424609-121954ba-8a0d-486e-83f5-c4102a669c8e.png)
+![1604747913941](https://user-images.githubusercontent.com/101636590/188339451-c0638280-3882-4883-8396-d23c88008068.png)
+
+(출처:https://www.linkedin.com/pulse/which-worse-false-positive-false-negative-miha-mozina-phd)
 
 블룸 필터의 장점은 True Negative가 절대로 발생하지 않는단 점이다.
 
@@ -59,7 +64,11 @@ False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제이다.
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424697-ef93e101-a865-47a3-9e14-2046590dd9d9.png)
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424752-f19bab99-09cd-4c83-9686-c0de4776c88d.png)
+```cpp
+void CreateFilter(const Slice* keys, int n, std::string* dst) const override {
+    // Compute bloom filter size (in both bits and bytes)
+    size_t bits = n * bits_per_key_;
+```
 
 LevelDB가 제공하는 벤치마킹 도구인 db_bench를 통해 측정을 진행할 때,
 
@@ -88,13 +97,17 @@ db_bench에선 블룸 필터를 사용하지 않는 것이 디폴트이기에 Bl
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424934-cea90e5b-ca24-449a-90f4-53dc6452f539.png)
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424941-231cf55b-6188-42a0-88ec-8b7c46d644f0.png)
+```cpp
+explicit BloomFilterPolicy(int bits_per_key) : bits_per_key_(bits_per_key) {
+    // We intentionally round down to reduce probing cost a little bit
+    k_ = static_cast<size_t>(bits_per_key * 0.69);  // 0.69 =~ ln(2)
+```
 
 또한 해시 함수의 개수 K의 경우 K = ln2 * (M/N) = ln2 * B이란 수식을 사용한다.
 
 이것은 수학적으로 증명된, 블룸 필터의 false positive 발생률을 최소한으로 줄일 수 있는 값이다.
 
-이에 관한 더 자세한 증명은 https://d2.naver.com/helloworld/749531 해당 글을 참조.
+이에 관한 더 자세한 증명은 https://d2.naver.com/helloworld/749531 해당 글을 참조하면 좋을 것이다.
 
 이 역시 bloom.cc 파일의 코드에서 구현되어 있는 것을 확인할 수 있다.
 
@@ -252,8 +265,23 @@ NewBloomFilterPolicy()는 "FilterPolicy" 클래스를 오버라이드한 "BloomF
 
 
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426122-bd927d23-6f3e-45f1-a2d4-056b08589f74.png)
+```CPP
+class LEVELDB_EXPORT FilterPolicy {
+ public:
+  virtual ~FilterPolicy();
 
+  // Return the name of this policy.  Note that if the filter encoding
+  virtual const char* Name() const = 0;
+
+  // Append a filter that summarizes keys[0,n-1] to *dst.
+  virtual void CreateFilter(const Slice* keys, int n,
+                            std::string* dst) const = 0;
+
+  // CreateFilter() on this class.  This method must return true if
+  // the key was in the list of keys passed to CreateFilter().
+  virtual bool KeyMayMatch(const Slice& key, const Slice& filter) const = 0;
+};
+```
 
 FilterPolicy 클래스의 경우
 
@@ -270,9 +298,18 @@ Write할 때 블룸 필터 배열을 생성하는 CreateFilter() 함수
 <br/>
 <br/>
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426214-c4c7fdf2-881d-46b7-80a4-01c4988f520b.png)
+```CPP
+class BloomFilterPolicy : public FilterPolicy {
+ public:
+  explicit BloomFilterPolicy(int bits_per_key) : bits_per_key_(bits_per_key) {
+    // We intentionally round down to reduce probing cost a little bit
+    k_ = static_cast<size_t>(bits_per_key * 0.69);  // 0.69 =~ ln(2)
+    if (k_ < 1) k_ = 1;
+    if (k_ > 30) k_ = 30;
+  }
 
-
+  const char* Name() const override { return "leveldb.BuiltinBloomFilter2"; }
+```
 
 해시 함수의 개수를 정하고 최대 개수를 제한하는 코드 부분과
 
@@ -281,7 +318,19 @@ Write할 때 블룸 필터 배열을 생성하는 CreateFilter() 함수
 <br/>
 <br/>
 
- ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426303-d9c4be90-2d6b-4025-8035-5483070159f5.png)
+```CPP
+void CreateFilter(const Slice* keys, int n, std::string* dst) const override {
+    // Compute bloom filter size (in both bits and bytes)
+    size_t bits = n * bits_per_key_;
+
+    // For small n, we can see a very high false positive rate.  Fix it
+    // by enforcing a minimum bloom filter length.
+    if (bits < 64) bits = 64;
+
+    size_t bytes = (bits + 7) / 8;
+    bits = bytes * 8;
+
+```
 
 그리고 CreateFilter() 함수는 bloom_bits(=bits_per_key)값과 num(=n)값을 곱해
 
@@ -290,7 +339,23 @@ Write할 때 블룸 필터 배열을 생성하는 CreateFilter() 함수
 <br/>
 <br/>
 
- ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426325-b0586409-deeb-4856-b1f2-8611ce6b46e9.png)
+```CPP
+const size_t init_size = dst->size();
+    dst->resize(init_size + bytes, 0);
+    dst->push_back(static_cast<char>(k_));  // Remember # of probes in filter
+    char* array = &(*dst)[init_size];
+    for (int i = 0; i < n; i++) {
+      // Use double-hashing to generate a sequence of hash values.
+      // See analysis in [Kirsch,Mitzenmacher 2006].
+      uint32_t h = BloomHash(keys[i]);
+      const uint32_t delta = (h >> 17) | (h << 15);  // Rotate right 17 bits
+      for (size_t j = 0; j < k_; j++) {
+        const uint32_t bitpos = h % bits;
+        array[bitpos / 8] |= (1 << (bitpos % 8));
+        h += delta;
+      }
+    }
+ ```
 
 "더블 해싱"을 처리하는 파트로 나뉘게 된다.
 
@@ -304,7 +369,7 @@ Write할 때 블룸 필터 배열을 생성하는 CreateFilter() 함수
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426385-eb7ead05-1359-4802-9bc6-0f2d892756bb.png)
 
 
-https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf
+(출처:https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf)
 
 해당 함수의 주석에 작성되어 있는 논문을 참고하면,
 
@@ -328,9 +393,20 @@ LevelDB에서 첫번째 해시 함수는 BloomHash()란 함수로,
 <br/>
 <br/>
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426431-9ec3e7cb-ba41-48da-b90a-280456b4ceb7.png)
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426436-93fc5dbf-b93a-4b9d-8abc-9b2a41aba6cc.png)
-
+```CPP
+namespace {
+static uint32_t BloomHash(const Slice& key) {
+  return Hash(key.data(), key.size(), 0xbc9f1d34);
+}
+```
+```CPP
+uint32_t Hash(const char* data, size_t n, uint32_t seed) {
+  // Similar to murmur hash
+  const uint32_t m = 0xc6a4a793;
+  const uint32_t r = 24;
+  const char* limit = data + n;
+  uint32_t h = seed ^ (n * m);
+```
 
 BloomHash는 key 값을 인자로 특정 값을 리턴하는 전형적인 해시함수의 형태를 취하고 있으며,
 
@@ -355,11 +431,18 @@ BloomHash는 key 값을 인자로 특정 값을 리턴하는 전형적인 해시
 <br/>
 
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426517-b9b43ff8-3541-474a-8549-2132edf178f5.png)
+```CPP
+uint32_t h = BloomHash(key);
+    const uint32_t delta = (h >> 17) | (h << 15);  // Rotate right 17 bits
+    for (size_t j = 0; j < k; j++) {
+      const uint32_t bitpos = h % bits;
+      if ((array[bitpos / 8] & (1 << (bitpos % 8))) == 0) return false;
+      h += delta;
+    }
+```
 
 
-
-그리고 특이사항으론 hash 하나당 하나의 bit를 1로 바꾸는데,
+그리고 특이사항으론 hash 하나당 하나의 bit를 1로 바꿔야 하는데,
 
 블룸 필터 배열은 char 배열로 한 칸의 크기가 1 byte = 8 bits 이므로
 
@@ -372,7 +455,23 @@ BloomHash는 key 값을 인자로 특정 값을 리턴하는 전형적인 해시
 
 
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426561-9998ffc6-d182-497e-8cc2-8a92f6a5611e.png)
+```CPP
+bool KeyMayMatch(const Slice& key, const Slice& bloom_filter) const override {
+    const size_t len = bloom_filter.size();
+    if (len < 2) return false;
+
+    const char* array = bloom_filter.data();
+    const size_t bits = (len - 1) * 8;
+
+    // Use the encoded k so that we can read filters generated by
+    // bloom filters created using different parameters.
+    const size_t k = array[len - 1];
+    if (k > 30) {
+      // Reserved for potentially new encodings for short bloom filters.
+      // Consider it a match.
+      return true;
+    }
+```
 
 
 데이터를 Read할때 사용하는 KeyMayMatch 함수의 경우
