@@ -1,4 +1,4 @@
-# #1 블룸 필터란 무엇인가<br/>
+# Bloom Filter <br/>
 <br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424363-05494e10-e230-45b1-9a2a-18f413748970.png)
@@ -17,7 +17,7 @@
 해당 배열 칸의 값이 전부 1인 데이터 블록만을 선별하여 읽는 것으로 Read 성능을 향상시키는 것이 가능하다.
 <br><br><br><br>
    
-
+# Bloom Filter Format
 ![sstable_logic](https://user-images.githubusercontent.com/101636590/188339431-c3f219ba-b2f0-4bc5-bbcf-a39a8be35d85.jpg)
 
 (출처:https://leveldb-handbook.readthedocs.io/zh/latest/)
@@ -30,7 +30,7 @@
    
    
   
-# #2 False Positive
+# False Positive
 
 
 ![1604747913941](https://user-images.githubusercontent.com/101636590/188339451-c0638280-3882-4883-8396-d23c88008068.png)
@@ -61,6 +61,7 @@ False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제이다.
 <br/>
 
 
+# Hash Function
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183424697-ef93e101-a865-47a3-9e14-2046590dd9d9.png)
 
@@ -189,7 +190,7 @@ false positive 자체는 덜 발생하였으나 이를 위한 더 많은 해시 
 <br/>
 <br/>
 
-# #3 블룸 필터의 코드 분석
+# Code of Bloom Filter
 
  
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425832-0ca0a6f6-a8d4-471b-8765-44a3ccad1904.png)
@@ -364,6 +365,7 @@ const size_t init_size = dst->size();
 <br/>
 <br/>
 
+# Double Hashing
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426381-db205ffc-c946-49af-a75d-2b0869145737.png)
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426385-eb7ead05-1359-4802-9bc6-0f2d892756bb.png)
@@ -485,264 +487,10 @@ or  대신 and 연산을 사용하여 필터 내부에 특정 key 값이 존재�
 <br/>
 <br/>
 
+# Code Flow of Bloom Filter
+[Write : Bloom Filter가 만들어지는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-write.md)  
+[Read : Bloom Filter로 특정 key를 찾는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-read.md) 
 
- # #4 Write를 할 때의 코드 흐름
 
- 
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426584-f700c3df-935e-406d-a918-540a42c7635b.png)
-
-
-다시 코드 흐름을 살펴보자면,
-
-Benchmark 클래스에서 클래스 변수 filterpolicy를 선언하고
-
-생성자 Benchmark()에서 해당 변수에 Bloomfilterpolicy 값을 채웠다.
-
-이 다음엔 해당 클래스 변수를 바탕으로 Run() 클래스 함수를 실행하게 된다.
-
-<br/>
-<br/>
-
- 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426611-de6ca39a-c5a3-4023-a8a1-eb495d5cb9b5.png)
-
-Run() 클래스 함수 역시 크게 3가지 부분으로 나뉘는데,
-
-<br/>
-<br/>
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426642-fe0298bb-797c-4453-8baf-877f042e7468.png)
-
-
-PrintHeader()는 db_bench를 돌리는 환경이나 데이터의 정보를 터미널에 출력해주는 함수이다.
-
-<br/>
-<br/>
-
- 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426672-0d944475-79c4-432c-ba36-14df703c97f6.png)
-
-
-그 다음 Open 함수의 경우
-
-Options이란 클래스를 새롭게 생성하여
-
-filterpolicy를 포함한 캐시나 버퍼 사이즈 등의 변수들을 저장하고
-
-이를 인자로 DB::Open 함수를 실행한다.
-
-<br/>
-<br/>
-
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426707-58f23dad-5837-46e5-aa3d-a652ff239d58.png)
- 
-
-이 다음 DB::Open는 데이터베이스를 여는 함수로, 
-
-인자로 받은 options의 값들을 impl이란 변수에 넣고
-
-이를 인자로 MaybeScheduleCompaction() 함수를 수행한다.
-
-<br/>
-<br/>
- 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426744-152b6145-f791-45f1-b45e-3e8c5139930f.png)
-
-
- 다음 흐름은 위와 같은데 Compaction을 진행하고
-
-필터 블록을 포함하여 SSTable을 생성한다.
-
-이 과정에서 filter_policy는 이전 함수에서 다음 함수로 값을 전달 받기만 하므로 자세한 설명은 생략한다.
-
-<br/>
-<br/>
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426775-4a824072-59c7-41dc-bb55-70ff53007dc4.png)
-
-참고로 블룸필터는 SSTable에 생성되므로,
-
-전체 데이터 크기가 적어 compaction이 발생하지 않는다면
-
-BGWork()가 아닌 NeedsCompaction()이 수행되어 블룸 필터가 생성되지 않는다.
-
- <br/>
-<br/>
-
- ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426808-21842d9f-e759-45ce-8a3c-1228726f1928.png)
-
-
-
-이후 마지막 GenerateFilter 함수에서,
-
-지금까지 해온 filterpolicy의 createFilter 함수를 호출하여 write를 진행한다.
-
-<br/>
-<br/>
-<br/>
-<br/>
-
-# #5 Read를 할 때의 코드 흐름
-
-![img](https://user-images.githubusercontent.com/101636590/187571334-4c1d3c8d-77e1-4824-8338-45dcf735d4c1.png)
-db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
-
-파라미터를 scanf로 읽어들인 뒤 benchmark.Run() 클래스 함수를 실행한다.
-
-해당 함수는 Write 과정을 처리하는 Open() 함수와 Read 과정을 처리하는 RunBenchmark()를 순서대로 실행한다.
-
-Open() 함수를 필두로 한 Write 과정을 설명하였으니
-
-이제 RunBenchmark() 함술를 필두로 한 Read 과정에 대해 살펴보자면,
-
-<br/>
-<br/>
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571403-87a6b37d-79d7-4316-8fcb-0be921793b05.png)
-
-해당 함수는 num_threads, name, method 3개의 파라미터를 필요로 하는데,
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571432-9cd667da-2c20-4e5e-ab32-524c60a0f005.png)
-
-num_threads는 스레드의 갯수로 db_bench를 돌릴때 파라미터로 지정할 수 있다.
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571446-87ebe70f-8ff6-4f80-b139-bc8e4992bc8c.png)
-
-Name은 벤치마크의 종류를 나타내는 문자열 변수이고,
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571476-2412be67-b288-4a32-9dda-09c1aaa5463e.png)
-
-Method는 name에 해당하는 벤치마크 함수의 주소값을 저장하는 포인터 변수이다.
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571491-fc28e122-7213-43b5-9a9b-18d37b2aebce.png)
-
-입력한 인자중 method 변수의 주소값은 arg[] 배열에 들어가게 되고,
-
-ThreadBody() 함수와 arg[] 배열을 인자로 StartThread 함수를 실행하게 되는데
-
-해당 함수는 arg[] 배열을 인자로 ThreadBody() 함수를 실행시키는 함수라 보면 편하다.
-
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571527-24c226d1-7472-4f77-8d3e-a3d5d63dd9d5.png)
-
-이후 ThreadBody() 함수를 통해 할당된 스레드로 벤치마크를 실행한다.
-
-<br/>
-<br/>
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571539-e04da925-24a4-45ab-a18a-a3df6905e80c.png)
-
-벤치마크의 실행 과정은 다음과 같은데,
-
-Bencmark::ReadRandom()과 같은 벤치마크 함수를 시작으로 여러번의 Get() 함수를 통해
-
-데이터베이스에서 sstable로, 그리고 각 레벨, 테이블, 필터 블록, 블룸 필터 순으로 점차 탐색 범위를 좁혀간다.
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571560-8df9e556-8de2-4417-8406-276b15299050.png)
-
-벤치마크 함수에선 각 벤치마크에 할당된 기능을 수행한 다음 db->Get() 함수를 사용한다.
-
-이때 db는 write 과정에서 데이터베이스를 열때 DB::open() 함수에서 사용한 데이터 베이스의 주소값 이다.
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571596-8689132d-30a6-46c7-9573-6ed38a1afb8e.png)
-
-해당 DBImpl::Get() 함수는 memtable, immemtable, sstable을 순서대로 탐색하는데
-
-이때 sstable을 탐색할때 사용하는 함수는 Version::Get() 함수이다
-
-(블룸 필터는 sstable에서만 사용된다.)
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571611-12c3dc7f-8354-41c1-a755-cb0c615a7f79.png)
-
-
-Version::Get() 함수는 Match() 함수를 인자로 ForEachOverlapping() 함수를 실행시키는 함수이고,
-
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571632-506f8716-7407-4241-a4b3-2adbbbc165d1.png)
-
-ForEachOverlapping() 함수는 sstable의 level 0를 먼저 탐색한 다음 다른 레벨을 탐색하는 함수이며,
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571645-e9646045-da9d-4c6a-8ec5-648d7bb4952a.png)
-
-
-해당 탐색 과정에 사용되는 함수가 Match() 함수이다.
-
-해당 함수는 TableCache::Get() 함수를 통해 테이블에 특정 key가 존재하는지 확인한 다음
-
-존재 여부에 따라 bool 값을 리턴한다.
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571728-d8a35e58-9fca-4da4-8cbc-ff2c0efca467.png)
-
-TableCache::Get() 함수는 Table::InternalGet() 함수를 호출하여 각 테이블을 탐색하고,
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571735-41dbff23-72b8-4dbc-b991-d202481bb541.png)
-
-InternalGet() 함수는 FilterBlockReader::KeyMayMatch() 함수를 통해 필터 블록을 탐색한 다음
-
-특정 key값이 존재하면 해당 블룸 필터가 가리키는 데이터 블록을 읽게된다
-
-<br/>
-<br/>
-
-
-![img](https://user-images.githubusercontent.com/101636590/187571767-41e151fb-626a-4fde-a91c-29e2982f2ed2.png)
-
-마지막으로 FilterBlockReader::KeyMayMatch()는 BloomFilterPolicy::KeyMayMatch()를 통해 
-
-필터 블록 안의 블룸 필터를 탐색하는데,
-
-<br/>
-<br/>
-
-
-![img](https://user-images.githubusercontent.com/101636590/187571797-2acbf595-64cb-475d-a080-b3d74276ef80.png)
-
-
-해당 함수는 앞서 미리 설명하였던 블룸 필터의 핵심 코드 bloom.cc 파일의 함수로,
-
-Write를 할 때 사용했던 hash 연산을 똑같이 처리한 다음
-
-해당 hash 값이 필터 블록에 존재하는지 확인하게 된다.
 
