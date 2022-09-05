@@ -22,18 +22,20 @@
 해당 배열 칸의 값이 전부 1인 데이터 블록만을 선별하여 읽는 것으로 Read 성능을 향상시키는 것이 가능하다.
 <br><br><br><br>
    
-# Bloom Filter Format
+# Bloom Filter Location
 ![sstable_logic](https://user-images.githubusercontent.com/101636590/188339431-c3f219ba-b2f0-4bc5-bbcf-a39a8be35d85.jpg)
 
 (출처:https://leveldb-handbook.readthedocs.io/zh/latest/)
 
 <br>
 
-하나의 sstable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
+블룸 필터는 SSTable 내부에 존재하며 해당 SSTable은 위 사진과 같은 구조를 지닌다.
 
-필터 블록엔 n개의 블룸 필터 배열이, 
+하나의 SSTable엔 n개의 데이터 블록과 1개의 필터 블록, 1개의 메타 인덱스 블록이 존재하며
 
-메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 배열인지 저장한다.<br>
+필터 블록엔 데이터 블록의 개수와 같은 n개의 블룸 필터 배열이, 
+
+메타 인덱스 블록은 각 블룸 필터 배열이 어느 데이터 블록의 배열인지 나타내는데 사용한다.<br>
   
   <br><br><br><br>
    
@@ -44,9 +46,12 @@
 
 ![1604747913941](https://user-images.githubusercontent.com/101636590/188339451-c0638280-3882-4883-8396-d23c88008068.png)
 
-(출처:https://www.linkedin.com/pulse/which-worse-false-positive-false-negative-miha-mozina-phd)
+(출처:https://www.linkedin.com/pulse/which-worse-false-positive-false-negative-miha-mozina-phd) 
 
-블룸 필터의 장점은 True Negative가 절대로 발생하지 않는단 점이다.
+<br>
+
+
+블룸 필터의 가장 큰 장점은 True Negative가 절대로 발생하지 않는단 점이다.
 
 True Negative는 데이터베이스에 존재하는 데이터를 존재하지 않는다 판단하는 것으로,
 
@@ -60,7 +65,7 @@ True Negative는 데이터베이스에 존재하는 데이터를 존재하지 �
 
 False Positive로 인해 읽을 필요 없는 데이터 블록까지 읽어 성능이 떨어지게 되므로
 
-False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제이다.
+False Positive를 줄이는 것 역시 블룸 필터의 중요한 과제 중 하나이다.
   
    
  
@@ -91,7 +96,9 @@ LevelDB가 제공하는 벤치마킹 도구인 db_bench를 통해 측정을 진�
  
  <br>
 
-db_bench에선 블룸 필터를 사용하지 않는 것이 디폴트이기에 Bloom_bits 값을 지정하여 블룸 필터를 켜주어야 하며,
+참고로 db_bench에선 블룸 필터를 사용하지 않는 것이 디폴트이기에 
+
+Bloom_bits 값을 지정하여 블룸 필터를 켜주어야 하며,
 
 만약 블룸 필터를 사용한다면 LevelDB에서 이상적으로 생각하는 Bloom_bits 값은 10이다.
 
@@ -153,65 +160,16 @@ False positive가 발생할 확률을 수학적으로 정리하면 위와 같으
 
 (그리고 k = ln2 * b = 0.69 b 이므로 k의 값은 bloom_bits의 값과 비례한다.)
 
-<br/>
-<br/>
-<br/>
-<br/>
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425038-94b8594d-a3c9-4325-8ddc-61f6c90c89b9.png)
-
-이를 db_bench를 통해 실험해 본 결과 bloom_bits 값이 커질수록
-
-false positive가 적게 발생하여 평균보다 성능이 빠른 경우가 더 많이 발생함을 알 수 있다.
-
-(해당 경우는 노란색으로 표시)
 
  <br/>
 <br/>
 <br/>
 <br/>
-
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425050-e20cbdb2-f988-45aa-bb71-f423c77236f8.png)
-
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425059-75c0aa55-ee7a-4b32-9905-e97275d20966.png)
-
-
-
-다만 bloom bits의 값이 너무 커질경우 오히려 false positive가 더 많이 발생하는 경향을 보였는데,
-
-이는 bloom.cc 코드에서 해시 함수의 최대 개수를 30개로 제한하고 있기에
-
-k = ln2 * b 라는 공식이 지켜지지 않아 되려 false positive가 증가한 것으로 추정된다.
-<br/>
- <br/>
-<br/>
 <br/>
 <br/>
 
-![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425778-ecfbef99-a13b-4efb-82ad-c666be9dc22e.png)
 
-
-그렇기에 해시 함수 개수를 제한하는 코드 부분을 제거하고 다시 db_bench를  본 결과,
-
-모든 ReadRandom의 측정값이 평균과 비슷한 값이 나옴을 알 수 있는데
-
-이는 false positive의 발생 확률이 대폭 낮아져서 false positive가 거의 발생하지 않았기 때문으로 추정된다.
-
-허나 이 경우엔 한번의 read에 무려 690번의 해시를 처리해야 하므로 (전자의 경우엔 30번)
-
-false positive 자체는 덜 발생하였으나 이를 위한 더 많은 해시 함수를 처리하는데 필요한 overhead가 더 컸기에
-
-되려 성능이 떨어진 것을 볼 수 있다.
-
- 
-
- <br/>
-<br/>
-<br/>
-<br/>
-
-# Code of Bloom Filter
+# Main Function & Bloom Filter
 
  
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183425832-0ca0a6f6-a8d4-471b-8765-44a3ccad1904.png)
@@ -223,7 +181,7 @@ LevelDB의 전체 코드엔 약 100개 가량의 메인 함수가 존재한다.
 
 db_bench.cc 파일에 존재함을 알 수 있다.
 
- <br/>
+
 <br/>
 <br/>
 <br/>
@@ -277,6 +235,13 @@ benchmark.Run()도 크게 3가지 파트로 나눌 수 있는데,
 <br/>
 <br/>
 
+ <br/>
+<br/>
+
+# Bloom Filter Policy
+
+<br/>
+<br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426008-acd92e3d-9adf-4d7b-8986-2c248e6705b1.png)
 
@@ -387,6 +352,9 @@ const size_t init_size = dst->size();
 <br/>
 
 # Double Hashing
+
+<br/>
+<br/>
 
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426381-db205ffc-c946-49af-a75d-2b0869145737.png)
 ![img1 daumcdn](https://user-images.githubusercontent.com/101636590/183426385-eb7ead05-1359-4802-9bc6-0f2d892756bb.png)
@@ -509,8 +477,8 @@ or  대신 and 연산을 사용하여 필터 내부에 특정 key 값이 존재�
 <br/>
 
 # Code Flow of Bloom Filter
-[Write : Bloom Filter가 만들어지는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-write.md)  
-[Read : Bloom Filter로 특정 key를 찾는 과정](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-read.md) 
+[Write : Bloom Filter의 생성](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-write.md)  
+[Read : Bloom Filter로 특정 key의 존재 여부를 빠르게 확인](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-read.md) 
 
 
 
