@@ -294,9 +294,6 @@ False Positive는 일단 읽어야 할 데이터가 존재하지 않아야 발�
 <br>
 
 # Result
-![image](https://user-images.githubusercontent.com/101636590/188546141-49a49cf8-3fc0-4bfd-816c-2900aa7bde5f.png)
-
-<br>
 
 ![image](https://user-images.githubusercontent.com/101636590/188546151-a06edf9a-93a0-4ed3-b277-f24f39251422.png)
 
