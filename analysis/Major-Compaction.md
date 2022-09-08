@@ -7,7 +7,7 @@
   `Major Compaction`을 왜 사용할까?  
       - `Major Compaction`을 사용하는 가장 분명한 이점은 중복 데이터를 정리하는 것입니다.  
       - 다른 레벨의 sst 파일에 동일한 키가 있는 경우 더 낮은 레벨의 데이터(오래된 데이터)를 삭제할 수 있습니다.  
-      - 전에 썼던 데이터가 필요할 수 있기 때문에 삭제할 데이터는 순차적으로 기록하고 최신 데이터를 갱신하여 디스크 공간을 절약합니다.  
+      - 전에 썼던 데이터가 필요할 수 있기 때문에 삭제할 데이터는 순차적으로 기록하고 최신 데이터를 갱신하여 디스크 공간을 절약합니다. 
       - 레벨0은 데이터 파일 간에 순서가 맞지 않을 수 있기 때문에 병합하여 레벨1에 병합되면 데이터가 정렬되고 파일을 쉽게 찾을 수 있어 읽기 효율성을 향상시킵니다.
       
   `Major Compaction`은 언제 발생할까?  
@@ -17,18 +17,19 @@
   > 전체적인 Major Compaction Code Flow를 살펴보겠습니다.
 
 ![image](https://user-images.githubusercontent.com/106041072/188577384-fca24121-ef6d-40b7-aa82-020faf6cc965.png)  
-`immutable`이 존재하지 않으면 `PickCompaction` 호출되고 합병할 정보를 갖고 `DoCompactionWork`에서 Major Compaction 이 진행됩니다.  
+각 레벨의 파일 수가 쌓여 임계치에 다다르면 `MaybeScheduleCompaction`이 합병을 해야하는지 판단합니다. 합병이 필요하면 `immutable`의 존재를 확인하고 없으면 `PickCompaction` 호출되고 합병할 정보를 갖고 `DoCompactionWork`에서 Major Compaction 이 진행됩니다.  
 
 Major compaction이 발생하는 과정을 소스 코드를 통해 세부적으로 알아보겠습니다.    
 
 
 ##### 전체적인 과정  
-  1. `MaybeScheduleCompaction`에서 합병이 필요한지 판단한다.  
-  2. `BackgroundCompaction`에서 immutable 있는지 판단하여 없으면 Major Compaction을 위한 함수를 호출합니다.  
-  3. `PickCompaction`에서 합병이 필요한 정보를 저장합니다. 
-  4. 저장한 정보를 갖고 `DoCompactionWork`에서 실질적인 합병이 진행됩니다.  
-  5. `DoCompactionWork`에서 `OpenCompactionOutputFile`,`FinishCompactionOutputFile`,`InstallCompactionResults` 가 실행되어 sst 파일을 만들고 합병한 레코드를 넣고 오류를 점검하며 해당 레벨로 파일을 넣습니다.  
-  6. 그 후 버전을 업데이트하고 마지막으로 `CleanupCompaction`을 호출하여 불필요한 sst 파일을 삭제하여 Major Compaction을 마무리합니다.  
+  1. 어떤 레벨의 파일 수가 임계치에 다다릅니다. 
+  2. `MaybeScheduleCompaction`에서 합병이 필요한지 판단한다.  
+  3. `BackgroundCompaction`에서 immutable 있는지 판단하여 없으면 Major Compaction을 위한 함수를 호출합니다.  
+  4. `PickCompaction`에서 합병이 필요한 정보를 저장합니다. 
+  5. 저장한 정보를 갖고 `DoCompactionWork`에서 실질적인 합병이 진행됩니다.  
+  6. `DoCompactionWork`에서 `OpenCompactionOutputFile`,`FinishCompactionOutputFile`,`InstallCompactionResults` 가 실행되어 sst 파일을 만들고 합병한 레코드를 넣고 오류를 점검하며 해당 레벨로 파일을 넣습니다.  
+  7. 그 후 버전을 업데이트하고 마지막으로 `CleanupCompaction`을 호출하여 불필요한 sst 파일을 삭제하여 Major Compaction을 마무리합니다.  
 
 ### MaybeScheduleCompaction
 > 합병이 필요한지를 판단합니다.
