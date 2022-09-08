@@ -11,7 +11,7 @@
       - 레벨0은 데이터 파일 간에 순서가 맞지 않을 수 있기 때문에 병합하여 레벨1에 병합되면 데이터가 정렬되고 파일을 쉽게 찾을 수 있어 읽기 효율성을 향상시킵니다.
       
   `Major Compaction`은 언제 발생할까?  
-      - 메모리에 immutable 존재하지 않거나 각 레벨의 파일 수가 쌓이다가 임계치에 다다르면 발생합니다.
+      - 각 레벨의 파일 수가 쌓이다가 임계치에 다다르고 이때 immutable이 존재하지 않으면 발생합니다.
       
 ## Overall Major Compaction Code Flow
   > 전체적인 Major Compaction Code Flow를 살펴보겠습니다.
