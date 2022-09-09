@@ -95,7 +95,7 @@ Status status;
   if (c == nullptr) {
   } else if (!is_manual && c->IsTrivialMove()) {
   
-    //...생략 (수동합병 진행부분)
+    //...생략 (TeamCompaciton) Manual Compaction progression part
     
   } //(TeamCompaction)With information to merge, proceed with Major Compaction.
   else {
