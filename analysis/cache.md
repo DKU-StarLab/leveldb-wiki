@@ -5,93 +5,125 @@
   - [2. What is LRU](#2-what-is-lru)
   - [3. LRU Cache Structure in LevelDB](#3-lru-cache-structure-in-leveldb)
   - [4. Overrall Cache Flow](#4-overrall-cache-flow)
+  - [5. Cache Source Code Analysis](#5-cache-source-code-analysis)
 ---
 ## 1. What is Cache
 
- 캐시는 하드웨어의 한 장치로서 메인 메모리나 디스크에 접근을 하기 이전에 거치는 메모리 저장 장치이다. 
-  
-캐시의 장점은 먼저 접근하는 속도가 굉장히 느린 메인 메모리에 비해서 접근 속도가 굉장히 빨라서 메인 메모리의 값을 미리 저장을 해두어서 하드웨어의 처리 속도를 굉장히 효율적으로 줄이는게 가능하다. 
-  
-하지만 캐시의 가장 큰 단점은 빠른 접근 속도로 인한 하드웨어의 비싼 가격이다. 비싼 가격으로 인해 큰 용량을 캐시에서는 사용하지 못하는 단점도 발생한다.
-  
-하지만 빠른 처리 속도로 인해 꼭 필요한 장치이다.
+ 캐시는 컴퓨팅 환경에서 일시적으로 무언가 데이터를 저장하는데 사용되는 하드웨어 또는 소프트웨어이며 최근 또는 자주 액세스하는 데이터의 성능을 향상시키는데 더 빠르게 사용되는 더 빠르고 더 비싼 소량의 메모리이다.
 
-<p align="center">
-<img width="700" alt="스크린샷 2022-08-27 오후 2 15 50" src="https://user-images.githubusercontent.com/74447373/187015861-02659a06-9a5a-4951-8487-97f5d17ee9ea.png">
-</p>
+캐시는 여러가지 종류를 가지고 있다.
+
+(1) CPU 캐시 : CPU 옆에 탑재한 메모리
+
+(2) 디스크 캐시 : 하드 디스크가 디스크 제어와 외부와의 인터페이스를 위해 내장한 컴퓨터
+
+(3) 기타 캐시 : 우리가 LevelDB의 캐시에서 파악해야 할 캐시이다. 위의 두 캐시 밖의 다른 캐시들은 대개 소프트웨어적으로 관리되며 예로는 운영체제의 메인 메모리를 하드 디스크에 복사해 놓는 페이지 캐시등이 있다.
 
 
 ---
 ## 2. What is LRU
-  LRU캐시란 말 그대로 Least Recently Used 알고리즘을 칭하는 말로 LRU캐시는 이 알고리즘을 사용하여 캐시를 처리하는 캐시를 말한다.
+  LRU(Least Recently Used) 정책이란 페이지 교체 알고리즘으로 불린다.
 
-  LevelDB는 LRU 캐시를 구현의 전형적인 사례이다.
-  
-  아래는 LRU 캐시 구조이며 아래 그림의 노드 제거 프로세스와 같은 전략을 LevelDB의 캐시가 가지고 있다.
+  약자를 직역해 보았을 때 의미는 가장 최근에 사용하지 않은 것이며 말 그대로 페이지에서 데이터를 제거할 때 가장 오랫동안 사용하지 않은 것을 제거하겠다는 알고리즘이다.
+
+  이 알고리즘의 기본 가설은 가장 오랫동안 사용하지 않았던 데이터는 앞으로도 사용할 가능성이 적다는 것이다.
+
+그렇다면 LRU Cache는 캐시에 공간이 부족할 때 가장 오랫동안 사용하지 않은 항목을 제거하고 새로운 노드를 배치하는 형식으로 동작됨을 알 수 있다.
+
+LRU Cache의 구현은 Double Linked List를 통해 이루어질 수 있다.
+
+아래는 LRU Cache를 설명하는 그림이다.
 
 <p align="center">
-<img width="700" alt="스크린샷 2022-08-27 오후 2 23 03" src="https://user-images.githubusercontent.com/74447373/187016130-35ee76ac-7b3e-4430-aa4e-80b1ec5a0506.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189130049-634c1d81-5b49-49b5-bfea-3621a82c6687.png">
 </p>
 
-읽는 순서는 A, B, C, D, E, D, F이다.
+기본 전제는 Head(맨 오른쪽 노드)에 가까운 데이터일 수록 최근에 사용한 데이터이고 Tail(맨 왼쪽 노드)에 가까울 수록 오랫동안 사용하지 않은 데이터로 간주한다.
 
-1. 괄호 안의 숫자는 정렬을 나타내며 숫자가 작을수록 제일 왼쪽 즉, 나중에 나타난다.
+그리고 만약 캐시에 적재된 데이터를 사용하는 경우 해당 데이터를 Head(맨 오른쪽 노드)로 옮겨 가장 최근에 사용된 값임을 명시하며 삭제 우선순위에서 멀어지게 한다.
 
-2. 읽는 순서에 따라 E를 읽는 순서가 다가왔을 때 캐시가 가득 찬 것으로 확인되므로 가장 빠른(Least Recently) A가 제거된다.
+읽는 데이터의 순서는 A, B, C, D, E, D, F이다.
+
+1. 괄호 안의 숫자는 정렬을 나타내며 숫자가 작을수록 맨 왼쪽 즉, Tail에 데이터가 담긴다.
+
+2. 읽는 순서에 따라 E를 읽는 순서가 다가왔을 때 캐시가 가득 찬 것으로 확인되므로 가장 오랫동안 사용하지 않은 데이터인 T즉, Least Recently Used인 A가 제거된다.
 
 3. 계속해서 D, F를 읽으며 정렬을 갱신하며 방문 횟수가 가장 적은 노드가 제거 및 대체가 반복되는 모습을 확인할 수 있다.
+
+<br>
+<br>
 
 LevelDB는 LRU 캐시를 구현하기 위해서 두가지의 다른 데이터 자료 구조를 도입하여 사용하고 있다.
 
 #### 1. HashTable(HandleTable) : 조회 구현에 사용
 #### 2. Double linked list : 오래된 데이터를 제거하는데 사용되는 정렬
+
+
   
 ---
 
 ## 3. LRU Cache Structure in LevelDB
 
-LevelDB의 LRU Cache Structure를 정확하게 파악하기 위하여 git clone을 통해 LevelDB소스코드를 받아와 분석하였다.
+LevelDB의 LRU Cache 구조를 정확하게 파악하기 위하여 git clone을 통해 LevelDB소스코드를 받아와 분석하였다.
 
 (source code download)
   
     git clone --recurse-submodules https://github.com/google/leveldb.git leveldb_release
 
-LevelDB에서 Cache는 LRU Cache의 형태를 띄고있다.
 
-아래는 전체 LRU Cache Structure의 개략도이다.
+<br>
+<br>
+<br>
+
+아래는 전체 LRU Cache 구조의 개략도이다.
 
 [정확한 코드의 분석은 leveldb_release/build/util/cache.cc 참고]
 
+
+
 <p align="center">
-<img width="800" alt="image" src="https://user-images.githubusercontent.com/84978165/188290272-482a3314-72e1-4ed9-b5d8-357276512bd7.png">
-</p>
+<img width="800" alt="image" src="https://user-images.githubusercontent.com/84978165/189133099-0140c4df-884a-4591-870d-a5e92be39df5.png">
 
 <br />
 
 #### <span style="color:red">(1)</span> ShardedLRUCache : LevelDB내에서 ShardedLRUCache는 내부에 LRU Cache 16개를 구성하고 있으며 외부 LRUCache로 정의한다.
 
-### +Sharded란?
-용량 이슈의 이유로 DB Level에서 한 데이터베이스의 데이터들을 다수의 데이터베이스에 분산 저장하는 기법
+<br>
+
+### +Sharding
+#### 먼저 Shard란 조각, 파편이라는 의미를 담고 있는 단어이며 Sharding은 데이터를 조각으로 나누어 관리하는 일종의 로드밸런싱 기술이다. 
+
+#### 로드 밸런싱이란 작업 요청을 여러 개의 서버나 처리 장치에 분산하여 나누는 것을 의미한다.하나의 큰 데이터베이스나 네트워크 시스템을 여러 개의 작은 조각으로 나누어 분산 저장하여 관리하는 것을 말한다.
+
+
+아래는 테이블의 각 행을 다른 테이블에 분산시켜 데이터를 분할 즉, Sharding 시키는 예를 그린 그림이다.
 
 <p align="center">
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188273992-8eaf9d3f-378e-4f7e-bf4f-f43e8ac92950.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189147668-2f5907b4-7529-427a-8176-7d4d9a55223d.png">
 </p>
 
 <br />
 
-#### <span style="color:red">(2)</span> LRUCache : LRUCache의 각 Item들은 LRUHandle이며 이는 <span style="color:red">(3)</span> LRUHandle 에서 후술한다. 
-#### 또한 LRUcCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
+LevelDB에서 사용하는 LRU Cache는 Shard기법을 통해 ShardedLRUCache가 내부적으로 LRU Cache 배열을 유지하고 있다. 
+
+*ShardedLRUCache에서 LRU Cache들을 호출할 때 각각에 대해서 상호 배제 잠금(Lock)을 수행하는데 이는 동일한 LRU Cache 개체에 대한 여러 스레드의 경합을 줄여 다중 스레드 조회 속도를 높이기 위함이다.*
+
+<br />
+
+#### <span style="color:red">(2)</span> LRUCache : LRUCache의 각 Item들은 LRUHandle이며 이는 *(3) LRUHandle* 에서 후술한다. 
+
+#### 또한 LRUCache는 1개의 HandleTable(HashTable)과 두개의 dobble linked list로 관리되며 LRUHandle들은 이중 연결 목록과 해시 테이블 HandleTable에서 모두 관리된다.
 
 <br/>
 
 아래 3 요소는 Cache를 이루는 두 Double Linked List와 HashTable이다.
 
 
-    LRUHandle lru_; // (5)에서 후술
+    LRUHandle lru_; // will be described (5).
 
-    LRUHandle in_use_; // (6)에서 후술
+    LRUHandle in_use_; // will be described (6).
 
-    HandleTable table_; // (4)에서 후술
+    HandleTable table_; // will be described (4).
 
 <br />
 <br />
@@ -107,35 +139,35 @@ LRUHandle의 구성요소:
 
     struct LRUHandle {
     void* value;
-    void (*deleter)(const Slice&, void* value); // 키, 값 공간을 해제하기 위한 사용자 콜백
-    LRUHandle* next_hash; // 해시 충돌을 처리하고 배열에 속하는 객체(LRUHandle)을 유지
-    LRUHandle* next; // 이중 연결 목록에서 LRU 순서를 유지하는 데 사용
-    LRUHandle* prev; // 이중 연결 목록에서 이전 노드를 가르킴
+    void (*deleter)(const Slice&, void* value); // to free the key and value space
+    LRUHandle* next_hash; // handle hash collisions and keep objects(LRUHandle) belonging to the array
+    LRUHandle* next; // used to maintain LRU order in doubly linked list
+    LRUHandle* prev; // points to the previous node in a doubly linked list
     size_t charge;  
-    size_t key_length; // 키 값의 길이
-    bool in_cache; // 핸들이 캐시 테이블에 있는지 여부 
-    uint32_t refs; // 핸들이 참조된 횟수     
-    uint32_t hash; // 샤딩 및 빠른 비교를 결정하는 데 사용되는 키의 해시 값    
-    char key_data[1]; // 키의 시작
+    size_t key_length; // length of key value
+    bool in_cache; // whether the handle is in the cache table
+    uint32_t refs; // the number of times the handle was referenced    
+    uint32_t hash; // hash value of key used to determine sharding and fast comparison    
+    char key_data[1]; // start of key
 
 <br/>
 
 #### <span style="color:red">(4)</span> HandleTable : 구현은 매우 간단한 해시 테이블로 되어있다.
 
 <p align="center">
-<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188283713-c8efe119-ec9c-4507-a8a6-b618403d6e42.png">
+<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/189152590-843477ba-efbd-41e6-a00e-6e0ed2e28062.png">
 </p>
 
 코드상에서 list_라는 이중 포인터를 선언하여 LRUHandle 객체를 관리한다.
 
-    uint32_t length_; // LRUHandle* 배열의 길이이다.
-    uint32_t elems_; // 테이블의 노드 수
+    uint32_t length_; // length of LRUHandle* array
+    uint32_t elems_; // number of nodes in the table
     LRUHandle** list_;
 
 아래는 LRUHandle** list_에 대한 LRUHandle* list_를 그림으로 나타낸 것이다.
 
 <p align="center">
-<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/188284416-8d24b765-0996-4af6-ac16-97fcea285223.png">
+<img width="300" alt="image" src="https://user-images.githubusercontent.com/84978165/189152971-8c8aabfd-4bea-4a50-a3f1-60e0e028aa96.png">
 </p>
 
 #### *위의 LRUHandle과 같은 그림이다.
@@ -143,22 +175,22 @@ LRUHandle의 구성요소:
 아래는 클래스 HandleTable에 대한 LRUHandle 메소드들의 정의이다.
 
     LRUHandle** FindPointer(const Slice& key, uint32_t hash) 
-    // next_hash를 사용하여 key에 해당하는 항목을 찾을 때까지 double linked list들을 탐색
-    // 일치하는 항목이 없다면 next_hash는 list_의 끝을 가르키고 next_hash의 값은 nullptr임
-    // 일치하는 항목을 찾았다면 next_hash가 가르키는 이중 포인터(LRUHandle)을 반환
-    // 위의 특성에 의해 Lookup, Insert, Remove의 첫줄에서 쓰인다. 
+    // use next_hash to traverse the double linked lists until find the item corresponding to the key.
+    // if no match is found, next_hash points to the end of list_ and the value of next_hash is nullptr.
+    // if a match is found, a double pointer (LRUHandle) pointed to by next_hash is returned.
+    // due to the above characteristics, it is used in the first line of Lookup, Insert, and Remove Funtion.
 
     LRUHandle* Lookup(const Slice& key, uint32_t hash)
-    // FindPointer를 호출하여 포인터가 가르키는 값(LRUHandle)을 직접 읽음
+    // directly read the value pointed to by the pointer (LRUHandle) by calling FindPointer
 
     LRUHandle* Insert(LRUHandle* h)
-    // FindPointer를 호출하여 포인터(next_hash)가 가르키는 위치에 LRUHandle을 집어넣음
+    // call FindPointer to put LRUHandle at the location pointed to by the pointer (next_hash).
 
     LRUHandle* Remove(const Slice& key, uint32_t hash)
-    // FindPointer를 호출하여 포인터(next_hash)가 가르키는 항목을 직접 삭제함
+    // directly deletes the item pointed to by the pointer (next_hash) by calling FindPointer
 
     void Resize() 
-    // 요소 즉, LRUHandle이 증가함에 따라 배열을 동적으로 확장함
+    // dynamically expand array as LRUHandle grows
 
 <br/>
 <br/>
@@ -168,16 +200,22 @@ LRUHandle의 구성요소:
   +여기서 hot은 자주 접근되는 데이터, cold는 접근되지 않는 데이터를 칭한다.
 
 <p align="center">
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290373-5c1348b6-5bc7-4eea-895e-3b53b68c7b2f.png">
+<img width="400" alt="image" src="https://user-images.githubusercontent.com/84978165/189153724-0f2ab665-8ffb-4cc1-a986-e0425560178e.png">
 </p>
 
 #### <span style="color:red">(5)</span> in_use_ : hot linked list이며 사용을 위해 호출자에게 반환되는 캐시의 캐시 객체를 유지 관리한다.
 
-#### <span style="color:red">(6)</span> lru_ : cold linked list이며 캐시에서 캐시된 개체의 인기도를 유지한다. 
+#### <span style="color:red">(6)</span> lru_ : cold linked list이며 캐시에서 캐시된 개체의 인기도를 유지한다.
+
+#### 위 두 double linked list는 refs라는 변수에 의해 관리되며 외부 사용자에 의해 참조되고 있는 캐시를 다루는 in_use_는 refs가 2이며 참조되지 않는(사용되지 않는) lru_는 refs가 1이다.
+
+*여기서 lru_, in_use_는 꼭두각시 노드이며 데이터 자체를 저장하지 않는다.*
 
 #### 데이터에 액세스할 때마다 이 list의 최신 위치에 삽입된다.(중요, 데이터는 항상 lru_ list에 먼저 삽입)
 
-#### lru_->next는 가장 오래된 데이터를 가리키고 lru_->prev는 최신 데이터를 가리킨다. 캐시가 차지하는 메모리 제한을 초과할 경우 lru_->next부터 데이터가 정리되며 LRU정책을 확인할 수 있다.
+#### lru_->next(다음 포인터)는 가장 오래된 데이터를 가리키고 lru_->prev(이전 포인터)는 최신 데이터를 가리킨다. 새로운 Handle이 삽입될 때마다 Double linked list의 끝에 삽입되며 lru_->prev(이전 포인터)는 새로 삽입된 Handle을 가리키도록 변경된다.
+
+#### 사용자에 의하여 호출되는 캐시는 lru_에서 next_hash를 통해 in_use_로 넘어가며 refs가 1에서 2로 증가한다.
 
 
 ---
@@ -188,7 +226,7 @@ LRUHandle의 구성요소:
 LevelDB에서 Cache는 읽기 작업과 함께 Cache에 대한 메커니즘이 확인이 가능하며 아래는 그에 대한 개략도이다.
 
 <p align="center">
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290416-f01c0e2a-ddb1-4eae-b10f-8055b7df8d5c.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189153950-24b00d7d-a39b-44ac-b2f6-4defe5a08299.png">
 </p>
 
 <br/>
@@ -266,7 +304,7 @@ TableCache::Get 소스코드:
 
 
 <p align="center">
-<img width="800" alt="image" src="https://user-images.githubusercontent.com/84978165/188290917-4f120d0d-0132-46f5-ad36-3c37b4c62769.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189172319-30682e1a-6f1b-4b1d-8b15-5e6dce460180.png">
 </p>
 
 *key*값은 file_number로 SSTable의 파일 이름이다.
@@ -296,7 +334,7 @@ TableCache::Get 소스코드:
 아래는 BlockCache의 구조이다.
 
 <p align="center">
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290995-f6730c28-1a67-4aaa-b7b0-667a6c5025e8.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189172561-b52b24a4-dfb5-4bb4-b0d4-69ca0963380e.png">
 </p>
 
 *key*값은 각 SSTable 파일의 offset에 고유한 cache_id를 조합하여 구성되어 있다.
@@ -317,7 +355,7 @@ BlockReader함수를 통해 Block Cache에 Lookup하고 Insert하는 작업이 �
 아래의 Cache 이용 개략도를 통해 위에서 쭉 설명한 LevelDB에서 Cache 이용의 흐름을 다시 파악할 수 있다.
 
 <p align="center">
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/188290416-f01c0e2a-ddb1-4eae-b10f-8055b7df8d5c.png">
+<img width="700" alt="image" src="https://user-images.githubusercontent.com/84978165/189153950-24b00d7d-a39b-44ac-b2f6-4defe5a08299.png">
 </p>
 
 ---
@@ -326,7 +364,7 @@ BlockReader함수를 통해 Block Cache에 Lookup하고 Insert하는 작업이 �
 
 TableCache는 ./db_bench의 option중 하나인 cache_size의 크기를 받아 TableCache::TableCacheSize함수를 통해 크기를 설정한 뒤 TableCache::TableCache를 통해 생성한다.
 
-TableCache's BackTrace:
+TableCache::TableCache의 BackTrace:
 
     leveldb::Benchmark::Run
     leveldb::Benchmark::Open 
