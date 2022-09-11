@@ -5,7 +5,6 @@
   - [2. What is LRU](#2-what-is-lru)
   - [3. LRU Cache Structure in LevelDB](#3-lru-cache-structure-in-leveldb)
   - [4. Overrall Cache Flow](#4-overrall-cache-flow)
-  - [5. Cache Source Code Analysis](#5-cache-source-code-analysis)
 ---
 ## 1. What is Cache
 
