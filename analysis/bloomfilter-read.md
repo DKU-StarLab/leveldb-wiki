@@ -61,8 +61,10 @@ ReadRandom()이나 ReadHot() 같은 벤치마크 함수를 시작으로 여러�
 
 <br/>
 <br/>
+<br/>
+<br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571560-8df9e556-8de2-4417-8406-276b15299050.png)
+![image](https://user-images.githubusercontent.com/101636590/189691492-2cfdce0a-d5d8-4eeb-b5d5-80627986b82d.png)
 
 벤치마크 함수에선 각 벤치마크에 할당된 기능을 수행한 다음 db->Get() 함수를 사용한다.
 
@@ -70,78 +72,48 @@ ReadRandom()이나 ReadHot() 같은 벤치마크 함수를 시작으로 여러�
 
 <br/>
 <br/>
+<br/>
+<br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571596-8689132d-30a6-46c7-9573-6ed38a1afb8e.png)
+![image](https://user-images.githubusercontent.com/101636590/189692806-b438bfc1-8ea4-4aa5-a65d-a134b6223b82.png)
 
 해당 DBImpl::Get() 함수는 memtable, immemtable, sstable을 순서대로 탐색하는데
 
-이때 sstable을 탐색할때 사용하는 함수는 Version::Get() 함수이다
+이때 sstable을 탐색할때 사용하는 함수가 Version::Get() 함수이며 
 
-(블룸 필터는 sstable에서만 사용된다.)
-
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571611-12c3dc7f-8354-41c1-a755-cb0c615a7f79.png)
-
-
-Version::Get() 함수는 Match() 함수를 인자로 ForEachOverlapping() 함수를 실행시키는 함수이고,
-
+(참고로 블룸 필터는 sstable에서만 사용된다.)
 
 <br/>
 <br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571632-506f8716-7407-4241-a4b3-2adbbbc165d1.png)
-
-ForEachOverlapping() 함수는 sstable의 level 0를 먼저 탐색한 다음 다른 레벨을 탐색하는 함수이며,
-
 <br/>
 <br/>
 
-![img](https://user-images.githubusercontent.com/101636590/187571645-e9646045-da9d-4c6a-8ec5-648d7bb4952a.png)
+![image](https://user-images.githubusercontent.com/101636590/189693687-c932cc19-9c1b-456e-8201-b87d3525df0c.png)
 
 
-해당 탐색 과정에 사용되는 함수가 Match() 함수이다.
+Version::Get() 함수는 Match() 함수를 인자로 ForEachOverlapping() 함수를 실행시키는 함수이다.
 
-해당 함수는 TableCache::Get() 함수를 통해 테이블에 특정 key가 존재하는지 확인한 다음
+ForEachOverlapping() 함수는 sstable의 level 0를 가장 먼저 탐색한 다음 다른 레벨들을 탐색하는 함수,
 
-존재 여부에 따라 bool 값을 리턴한다.
+그리고 해당 탐색 과정에 사용되는 Match() 함수는 
 
-<br/>
-<br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571728-d8a35e58-9fca-4da4-8cbc-ff2c0efca467.png)
-
-TableCache::Get() 함수는 Table::InternalGet() 함수를 호출하여 각 테이블을 탐색하고,
+테이블에 특정 key가 존재하는지 확인한 다음 존재 여부에 따른 bool 값을 리턴하는 함수이다.
 
 <br/>
 <br/>
-
-![img](https://user-images.githubusercontent.com/101636590/187571735-41dbff23-72b8-4dbc-b991-d202481bb541.png)
-
-InternalGet() 함수는 FilterBlockReader::KeyMayMatch() 함수를 통해 필터 블록을 탐색한 다음
-
-특정 key값이 존재하면 해당 블룸 필터가 가리키는 데이터 블록을 읽게된다
-
 <br/>
 <br/>
 
+![image](https://user-images.githubusercontent.com/101636590/189698016-8058db18-1d10-4b3b-b57c-363699681d02.png)
 
-![img](https://user-images.githubusercontent.com/101636590/187571767-41e151fb-626a-4fde-a91c-29e2982f2ed2.png)
+이 Match() 함수가 호출한 TableCache::Get() 함수는 테이블을 탐색,
 
-마지막으로 FilterBlockReader::KeyMayMatch()는 BloomFilterPolicy::KeyMayMatch()를 통해 
+그 다음 FilterBlockReader::KeyMayMatch()는 필터 블록을,
 
-필터 블록 안의 블룸 필터를 탐색하는데,
+BloomFilterPolicy::KeyMatMatch()는 블룸 필터를 탐색하여 
 
-<br/>
-<br/>
+최종적으로 특정 키가 존재 여부를 확인하게된다.
 
-
-![img](https://user-images.githubusercontent.com/101636590/187571797-2acbf595-64cb-475d-a080-b3d74276ef80.png)
+그리고 중간의 InternalGet() 함수는 찾고있는 키가 존재할 경우 Read를 진행하는 함수이다.
 
 
-해당 함수는 앞서 미리 설명하였던 블룸 필터의 핵심 코드 bloom.cc 파일의 함수로,
-
-Write를 할 때 사용했던 hash 연산을 똑같이 처리한 다음
-
-해당 hash 값이 필터 블록에 존재하는지 확인하게 된다.
