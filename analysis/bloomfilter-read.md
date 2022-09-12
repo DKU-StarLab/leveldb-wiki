@@ -5,7 +5,7 @@ db_bench는 db_bench.cc 파일의 main 함수로 부터 시작되며,
 
 파라미터를 scanf로 읽어들인 뒤 benchmark.Run() 클래스 함수를 실행한다.
 
-해당 함수는 Write 과정을 처리하는 Open() 함수와 Read 과정을 처리하는 RunBenchmark()를 순서대로 실행한다.
+해당 함수는 Write 과정을 처리하는 Open() 함수와 Read 과정을 처리하는 RunBenchmark() 함수를 순서대로 실행한다.
 
 
 <br/>
