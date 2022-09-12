@@ -171,6 +171,17 @@ False positive가 발생할 확률을 수학적으로 정리하면 위와 같으
 [Write : Bloom Filter의 생성](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-write.md)  
 [Read : Bloom Filter로 특정 key의 존재 여부를 빠르게 확인](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-read.md) 
 
+ <br/>
+<br/>
+ <br/>
+<br/>
 
-
+# Reference
+[확률적 자료구조를 이용한 추정](https://d2.naver.com/helloworld/749531)   
+[LevelDB Github](https://github.com/google/leveldb)     
+[Github - db_bench.cc](https://github.com/google/leveldb/blob/main/benchmarks/db_bench.cc)     
+[Github - bloom.cc](https://github.com/google/leveldb/blob/main/util/bloom.cc)     
+[Github - filter_block.cc](https://github.com/google/leveldb/blob/main/table/filter_block.cc)     
+[Github - filter_policy.h](https://github.com/google/leveldb/blob/main/include/leveldb/filter_policy.h)     
+[LevelDB Handbook](https://leveldb-handbook.readthedocs.io/zh/latest/bloomfilter.html)     
 
