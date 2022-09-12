@@ -104,7 +104,7 @@ ForEachOverlapping() 함수는 sstable의 level 0를 가장 먼저 탐색한 다
 <br/>
 <br/>
 
-![image](https://user-images.githubusercontent.com/101636590/189698016-8058db18-1d10-4b3b-b57c-363699681d02.png)
+![image](https://user-images.githubusercontent.com/101636590/189708396-b9111409-9051-4d3f-9a0c-a801793935f1.png)
 
 이 Match() 함수가 호출한 TableCache::Get() 함수는 테이블을 탐색,
 
