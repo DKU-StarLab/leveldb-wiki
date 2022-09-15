@@ -15,6 +15,7 @@ LevelDB에선 다음과 같은 순서로 원하는 key를 찾는다.
 ```cpp
 Status DBImpl::Get(const ReadOptions& options, const Slice& key,
                    std::string* value) {
+
   // ...
 
   MemTable* mem = mem_;
