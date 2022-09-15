@@ -15,28 +15,29 @@ LevelDB에선 다음과 같은 순서로 원하는 key를 찾는다.
 ```cpp
 Status DBImpl::Get(const ReadOptions& options, const Slice& key,
                    std::string* value) {
-  // ...생략
+
+  // ...
 
   MemTable* mem = mem_;
   MemTable* imm = imm_;
   Version* current = versions_->current();
   
-  // ...생략
+  // ...
   {
     mutex_.Unlock();
     LookupKey lkey(key, snapshot);
-    // 1. MemTable에서 탐색
+    // 1. Searching in the MemTable
     if (mem->Get(lkey, value, &s)) {
-    // 2. 없다면, Immutable MemTable에서 탐색
+    // 2. If not in MemTable, searching in the Immutable MemTable
     } else if (imm != nullptr && imm->Get(lkey, value, &s)) {
-    // 3. 없다면, storage(disk)에서 탐색
+    // 3. If not in Immutable MemTable, searching in storage(disk)
     } else {
       s = current->Get(options, lkey, value, &stats);
       have_stat_update = true;
     }
     mutex_.Lock();
   }
-  // ...생략
+  // ...
 }
 ```  
 <br/>
@@ -53,23 +54,23 @@ Status DBImpl::Get(const ReadOptions& options, const Slice& key,
 ```cpp
 Status Version::Get(const ReadOptions& options, const LookupKey& k,
                     std::string* value, GetStats* stats) {
-  // ...생략
+  // ...
 
   struct State {
-    // ...생략
+    // ...
 
     static bool Match(void* arg, int level, FileMetaData* f) {
-      // ...생략
-      // 2. 골라낸 SSTable로부터 target key를 찾는다.
+      // ...
+      // 2. Find the target key from the selected SSTable
       state->s = state->vset->table_cache_->Get(*state->options, f->number,
                                                 f->file_size, state->ikey,
                                                 &state->saver, SaveValue);
-      // ...생략
+      // ...
     }
   };
 
-  // ...생략
-  // 1. 각 Level에서 target key가 있을 만한 SSTable들을 골라낸다
+  // ...
+  // 1. At each level, select SSTables that may have a target key
   ForEachOverlapping(state.saver.user_key, state.ikey, &state, &State::Match);
 
   return state.found ? state.s : Status::NotFound(Slice());
@@ -92,7 +93,7 @@ void Version::ForEachOverlapping(Slice user_key, Slice internal_key, void* arg,
   const Comparator* ucmp = vset_->icmp_.user_comparator();
   std::vector<FileMetaData*> tmp;
   tmp.reserve(files_[0].size());
-  // Level 0: Linear Search로 SSTable들을 골라낸다
+  // Level 0: Picks out SSTables via Linear Search
   for (uint32_t i = 0; i < files_[0].size(); i++) {
     FileMetaData* f = files_[0][i];
     if (ucmp->Compare(user_key, f->smallest.user_key()) >= 0 &&
@@ -103,24 +104,24 @@ void Version::ForEachOverlapping(Slice user_key, Slice internal_key, void* arg,
   if (!tmp.empty()) {
     std::sort(tmp.begin(), tmp.end(), NewestFirst);
     for (uint32_t i = 0; i < tmp.size(); i++) {
-      // 파라미터로 받은 함수를 수행
+      // Perform functions received as parameter
       if (!(*func)(arg, 0, tmp[i])) return;
     }
   }
 
-  // Level 0 이외의 Level에서의 탐색
+  // Ohter Levels: Picks out SSTables via Binary Search
   for (int level = 1; level < config::kNumLevels; level++) {
     size_t num_files = files_[level].size();
     if (num_files == 0) continue;
 
-    // FindFile : Binary search로 target key가 있을 만한 SSTable의 인덱스를 얻어옴
+    // FindFile : Gets index of SSTable that may have a target key via Binary search
     uint32_t index = FindFile(vset_->icmp_, files_[level], internal_key);
     if (index < num_files) {
       FileMetaData* f = files_[level][index];
       if (ucmp->Compare(user_key, f->smallest.user_key()) < 0) {
 
       } else {
-        // 파라미터로 받은 함수를 수행
+        // Perform functions received as parameter
         if (!(*func)(arg, level, f)) return;
       }
     }
@@ -144,11 +145,12 @@ Status TableCache::Get(const ReadOptions& options, uint64_t file_number,
                        void (*handle_result)(void*, const Slice&,
                                              const Slice&)) {
   Cache::Handle* handle = nullptr;
-  // 1. 해당 SSTable 개체가 기존에 이미 캐싱됐는지 살피고, 캐싱되지 않았다면 해당 SSTable 개체를 캐싱한다.
+  // 1. Checks whether the corresponding SSTable has already been cached
+  //    If not, caches the corresponding SSTable
   Status s = FindTable(file_number, file_size, &handle);
   if (s.ok()) {
     Table* t = reinterpret_cast<TableAndFile*>(cache_->Value(handle))->table;
-    // 2. 해당 SSTable 내부를 탐색해 target key를 찾는다.
+    // 2. Find the target key via searching inside the corresponding SSTable
     s = t->InternalGet(options, k, arg, handle_result);
     cache_->Release(handle);
   }
@@ -177,30 +179,32 @@ Status Table::InternalGet(const ReadOptions& options, const Slice& k, void* arg,
                           void (*handle_result)(void*, const Slice&,
                                                 const Slice&)) {
   Status s;
-  // Index Block에 대한 Iterator를 만든다
+  // Create an Iterator for the Index Block
   Iterator* iiter = rep_->index_block->NewIterator(rep_->options.comparator);
-  // 1. Index Block를 탐색해 target key가 있을 만한 Data Block을 추려낸다
+  // 1. Search the Index Block and find the Data Block that may have a target key
   iiter->Seek(k);
   if (iiter->Valid()) {
-    // ...생략
+    // ...
 
-    // 2. 블룸필터를 사용할 경우, 추려낸 Data Block에 target key가 있는지 블룸필터로 조사한다
+    // 2. If using a bloom filter, 
+    //    investigate with a bloom filter if there is a target key in the found Data Block
     if (filter != nullptr && handle.DecodeFrom(&handle_value).ok() &&
         !filter->KeyMayMatch(handle.offset(), k)) {
       // Not found
     } else {
-      // 3. target key가 있다고 판단되면, 추려낸 Data Block에 대한 Iterator를 만든다
+      // 3. If it is determined that there is a target key,
+      //    reate an Iterator for the found Data Block
       Iterator* block_iter = BlockReader(this, options, iiter->value());
-      // 4. 만든 Iterator를 활용해 Data Block를 탐색한다
+      // 4. Exploring the Data Block using the generated Iterator
       block_iter->Seek(k);
-      // 5. target key를 찾았다면 그 value를 저장한다
+      // 5. If find the target key, save the value
       if (block_iter->Valid()) {
         (*handle_result)(arg, block_iter->key(), block_iter->value());
       }
-      // ...생략
+      // ...
     }
   }
-  // ...생략
+  // ...
 }
 ```  
 <br/>  
@@ -223,33 +227,34 @@ Status Table::InternalGet(const ReadOptions& options, const Slice& k, void* arg,
 ```cpp
 Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
                              const Slice& index_value) {
-  // ...생략
+  // ...
 
   if (s.ok()) {
     BlockContents contents;
     if (block_cache != nullptr) {
-      // ...생략
+      // ...
 
-      // 1. Lookup메소드를 통해 해당하는 Data Block이 기존에 이미 캐싱됐는지 본다
+      // 1. Checks whether the corresponding Data Block has already been cached via Lookup
       cache_handle = block_cache->Lookup(key);
       if (cache_handle != nullptr) {
         block = reinterpret_cast<Block*>(block_cache->Value(cache_handle));
       } else {
-        // 2. 캐싱되지 않았다면 해당하는 Data Block을 캐싱한다
-        // 2-1. ReadBlock으로 해당하는 Data Block의 내용을 읽는다
+        // 2. If not, caches the corresponding Data Block
+        // 2-1. Read the contents of the corresponding Data Block via ReadBlock
         s = ReadBlock(table->rep_->file, options, handle, &contents);
         if (s.ok()) {
-          // 2-2. 읽은 내용을 담아 새 Block객체를 만든다(즉 해당하는 Data Block을 메모리로 로드하는 것)
+          // 2-2. Create a new Block object with read contents
+          //      (It means loading the corresponding Data Block into memory)
           block = new Block(contents);
           if (contents.cachable && options.fill_cache) {
-            // 2-3. 로드한 Data Block을 Cache에 넣는다
+            // 2-3. Insert Loaded data block into cache
             cache_handle = block_cache->Insert(key, block, block->size(),
                                                &DeleteCachedBlock);
           }
         }
       }
     } else {
-      // 만약 Cache를 쓰지 않는다면 해당하는 Data Block의 내용을 메모리로 로드만 한다
+      // If do not use cache, just load the corresponding Data Block into memory
       s = ReadBlock(table->rep_->file, options, handle, &contents);
       if (s.ok()) {
         block = new Block(contents);
@@ -257,12 +262,12 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
     }
   }
 
-  // 3. 그 Data Block에 대한 Iterator를 만든다
+  // 3. Create an Iterator for that Data Block
   Iterator* iter;
   if (block != nullptr) {
     iter = block->NewIterator(table->rep_->options.comparator);
 
-    // ...생략
+    // ...
   } else {
     iter = NewErrorIterator(s);
   }
@@ -282,27 +287,27 @@ Iterator* Table::BlockReader(void* arg, const ReadOptions& options,
 
 ```cpp
 void Seek(const Slice& target) override {
-    // ...생략
+    // ...
 
-    // 1. target이 있을 만한 구역을 Binary Search로 찾는다
+    // 1. Find the area where the target is located via Binary Search
     while (left < right) {
       uint32_t mid = (left + right + 1) / 2;
       uint32_t region_offset = GetRestartPoint(mid);
       
-      // ...생략
+      // ...
       Slice mid_key(key_ptr, non_shared);
       if (Compare(mid_key, target) < 0) {
-        // "mid"의 key값이 "target"보다 작은 경우
+        // if "mid" < "target"
         left = mid;
       } else {
-        // "mid"의 key값이 "target"보다 크거나 같을 경우
+        // if "mid" >= "target"
         right = mid - 1;
       }
     }
 
-    // ...생략
+    // ...
 
-    // 2. Linear Search로 찾은 구역 내에서 target을 찾는다 
+    // 2. Find the target in the correspond area via Linear Search
     while (true) {
       if (!ParseNextKey()) {
         return;
