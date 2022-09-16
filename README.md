@@ -39,9 +39,9 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
     - [SSTable Write](./analysis/sstable-write.md)
     - [SSTable Read](./analysis/sstable-read.md)
 6. Bloom Filter
-    - [Bloom Filter]
-    - [Bloom Filter Write]
-    - [Bloom Filter Read]
+    - [Bloom Filter](./analysis/bloomfilter/bloomfilter.md)
+    - [Bloom Filter Write](./analysis/bloomfilter/bloomfilter-write.md)
+    - [Bloom Filter Read](./analysis/bloomfilter/bloomfilter-read.md)
 7. [Cache](./analysis/cache.md)
 8. [Manifest]
 
