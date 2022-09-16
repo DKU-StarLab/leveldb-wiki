@@ -3,8 +3,8 @@
 ## Index
 - [WAL](#WAL): WAL 에 대한 개요를 설명한다.
 - [MANIFEST](#MANIFEST): MANIFEST 에 대한 개요를 설명한다.
-- [ETC](#ETC): 추가적으로 알게된 연구 결과에 대한 내용을 설명한다.
 - [Functions](#Functions): WAL/MANIFEST 관련 함수들에 대한 설명이다.
+- [ETC](#ETC): 추가적으로 알게된 연구 결과에 대한 내용을 설명한다.
 
 ## WAL
 ### Introduction
