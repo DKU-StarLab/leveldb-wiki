@@ -28,7 +28,7 @@ LevelDB 의 경우 `.log` 의 파일 형식으로 파일을 저장한다.
 #### Header
 WAL 에서 header 를 저장하는 형식은 다음과 같다.
 
-![image](https://user-images.githubusercontent.com/49092508/190629855-b7ff4227-11b4-484a-a97d-d21073bee682.png)
+<img src="https://user-images.githubusercontent.com/49092508/190629855-b7ff4227-11b4-484a-a97d-d21073bee682.png" width="700"/>
 
 순차적으로
 1. CRC Checksum 4byte
@@ -41,8 +41,7 @@ WAL 에서 header 를 저장하는 형식은 다음과 같다.
 WAL 의 header 이후 payload 는 다음의 형식으로 저장한다.
 > 다음의 예시는 {"A": "Hello world!", "B": "Good bye world!", "C": "I am hungry"} 이렇게 3쌍의 Key-value 쌍을 PUT 했을 때 작성되는 WAL 파일의 예시이다.
 
-
-![image](https://user-images.githubusercontent.com/49092508/190630588-6431a48b-0c82-43b7-85f0-0aa962930d64.png)
+<img src="https://user-images.githubusercontent.com/49092508/190630588-6431a48b-0c82-43b7-85f0-0aa962930d64.png" width="700"/>
 
 ## MANIFEST
 MANIFEST 는 `VersionSet` 과 `VersionEdit` 를 파일로 정리해놓는 기능을 한다. 이는 `MANIFEST-000000` 와 같은 이름으로 저장이 된다. 
@@ -80,21 +79,6 @@ MANIFEST 파일은 LevelDB 를 활용하며 이름이 바뀌는데, 이번 실�
 
 LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고 있던 `VersionSet` 을 `delete` 하며 기존의 버전에 대한 데이터를 MANIFEST 파일에 작성한다. 이때 작성된 `MANIFEST` 파일을 통해, 다음에 LevelDB 를 시작할 때 기존의 버전을 복구할 수 있게 된다.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Functions
 해당 내용은 WAL/MANIFEST 에 관련하여 공부를 하며 알게된 함수들과, 해당 함수들에 대한 설명을 포함한다.
 
@@ -103,7 +87,7 @@ LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고
 
 ```Reader``` 클래스와 몇 가지 함수가 있다.  
 
-<img src="https://drive.google.com/u/1/uc?id=1VQ_Q20Z1ZtrY39Lead8EDtCSbr9z-BIS&export=download" width="460" height="280">  
+<img src="https://drive.google.com/u/1/uc?id=1VQ_Q20Z1ZtrY39Lead8EDtCSbr9z-BIS&export=download" width="700"/>  
 
 나는 이 파일의 흐름을 살펴보고자 노력했다.  
 
@@ -113,9 +97,7 @@ LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고
 
 읽고자 하는 데이터가 여러 블록으로 나뉘어져 있을 경우 ```scratch```에 각 블럭의 데이터를 ```append```해주었다가 마지막 블럭을 만나면 한번에 ```record```에 준다.  
 
-![a-3](https://drive.google.com/u/1/uc?id=1hWZOM3mO0TeymflMS6knKOzybNslOmhE&export=download)  
-
-​
+<img src="https://drive.google.com/u/1/uc?id=1hWZOM3mO0TeymflMS6knKOzybNslOmhE&export=download" width="700"/>  
 
 읽으려는 데이터가 몇 개의 블럭에 걸쳐 있는지 알기 위해서 ```switch```문에서는 각 블럭의 ```type```을 읽고 블럭을 더 읽을 것인지 판단하며  
 
@@ -127,7 +109,7 @@ LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고
 
 ```in_fragmented_record``` 변수를 ```true```로 설정하여 뒤에 블럭이 더 있음을 알리는 역할을 한다.  
 
-![a-4](https://drive.google.com/u/1/uc?id=1hpQesw4cq7697jc_H0pcu_sP-1igFiiK&export=download)  
+<img src="https://drive.google.com/u/1/uc?id=1hpQesw4cq7697jc_H0pcu_sP-1igFiiK&export=download" width="700"/>  
 
 ```kMiddleType```의 경우 ```scratch```에 데이터를 ```append``` 해준다.  
 
@@ -137,8 +119,7 @@ LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고
 
 ```kEof```의 경우는 더이상 읽을 블럭이 없을 때이다.  
 
-![a-5](https://drive.google.com/u/1/uc?id=1nPL8OqHRJ03CzOKO6cWtbdU1i-T_fCiC&export=download)  
-
+<img src="https://drive.google.com/u/1/uc?id=1nPL8OqHRJ03CzOKO6cWtbdU1i-T_fCiC&export=download" width="700"/>  
 
  ```kBadRecord```의 경우 ```checksum```이 맞지 않거나 레코드의 길이가 0이거나 등  
 
@@ -146,7 +127,7 @@ LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고
 
  ```모든  keyType에  해당되지  않는  경우```는 오류를 알린다.  
 
-![a-6](https://drive.google.com/u/1/uc?id=1wa81Pks8xtTKhS7hz0gK579JJK1gAKMg&export=download)
+<img src="https://drive.google.com/u/1/uc?id=1wa81Pks8xtTKhS7hz0gK579JJK1gAKMg&export=download" width="700"/>  
 
 ### `log::Writer:AddRecord`
 
