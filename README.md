@@ -39,10 +39,11 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
     - [SSTable Write](./analysis/sstable-write.md)
     - [SSTable Read](./analysis/sstable-read.md)
 6. Bloom Filter
-    - []
+    - [Bloom Filter]
+    - [Bloom Filter Write]
+    - [Bloom Filter Read]
 7. [Cache](./analysis/cache.md)
 8. [Manifest]
-9.  LevelDB db_bench
 
 ### 벤치마크 실험 분석
 - WAL
