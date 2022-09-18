@@ -35,9 +35,9 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
     - [Major Compaction](./analysis/compaction/Major-Compaction.md)
     - [Minor Compaction]
 5. SSTable
-    - [SSTable Format](./analysis/sstable.md)
-    - [SSTable Write](./analysis/sstable-write.md)
-    - [SSTable Read](./analysis/sstable-read.md)
+    - [SSTable Format](./analysis/sstable/sstable.md)
+    - [SSTable Write](./analysis/sstable/sstable-write.md)
+    - [SSTable Read](./analysis/sstable/sstable-read.md)
 6. Bloom Filter
     - [Bloom Filter](./analysis/bloomfilter/bloomfilter.md)
     - [Bloom Filter Write](./analysis/bloomfilter/bloomfilter-write.md)
