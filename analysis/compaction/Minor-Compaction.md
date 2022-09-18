@@ -119,3 +119,48 @@ Status DBImpl::WriteLevel0Table(MemTable* mem, VersionEdit* edit,
 1. 첫번째로 imm memtable의 정보를 정리합니다.
 2. `BuildTable`함수로 imm memtbale 정보로 SST를 만듭니다.
 3. 성공적으로 SST를 생성하게 되었다면 Version에 이 정보를 업데이트 해줍니다.
+
+## 추가 설명 
+### Trivial move  
+>  Trivial move이란 Minor Compaction의 일종으로 새로 생성되는 SST가 각 level의  SST의 Key가 겹치지 않는다면 바로 level 2로 내려주는 작업을 합니다.
+
+```cpp
+void DBImpl::BackgroundCompaction() {
+  
+ // ...생략 
+  Status status;
+  if (c == nullptr) {
+    // Nothing to do
+  } else if (!is_manual && c->IsTrivialMove()) {
+    // 1.  Move file to next level
+    assert(c->num_input_files(0) == 1);
+    FileMetaData* f = c->input(0, 0);
+    c->edit()->RemoveFile(c->level(), f->number);
+    c->edit()->AddFile(c->level() + 1, f->number, f->file_size, f->smallest,
+                       f->largest);
+    status = versions_->LogAndApply(c->edit(), &mutex_);
+    if (!status.ok()) {
+      RecordBackgroundError(status);
+    }
+    VersionSet::LevelSummaryStorage tmp;
+    Log(options_.info_log, "Moved #%lld to level-%d %lld bytes %s: %s\n",
+        static_cast<unsigned long long>(f->number), c->level() + 1,
+        static_cast<unsigned long long>(f->file_size),
+        status.ToString().c_str(), versions_->LevelSummary(&tmp));
+  }
+  // ...생략 
+}
+
+
+bool Compaction::IsTrivialMove() const {
+  const VersionSet* vset = input_version_->vset_;
+  // Avoid a move if there is lots of overlapping grandparent data.
+  // Otherwise, the move could create a parent file that will require
+  // a very expensive merge later on.
+  return (num_input_files(0) == 1 && num_input_files(1) == 0 &&
+          TotalFileSize(grandparents_) <=
+              MaxGrandParentOverlapBytes(vset->options_));
+}
+
+```
+- `is_manual && c->IsTrivialMove()`이 true라면 Trivial move 을 실행합니다.
