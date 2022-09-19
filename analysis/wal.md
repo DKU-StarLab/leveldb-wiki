@@ -2,8 +2,8 @@
 이 문서는 WAL/MANIFEST 에 대한 문서이다.
 ## Index
 - [WAL](#WAL): WAL 에 대한 개요를 설명한다.
-- [MANIFEST](#MANIFEST): MANIFEST 에 대한 개요를 설명한다.
-- [Functions](#Functions): WAL/MANIFEST 관련 함수들에 대한 설명이다.
+- [Functions](#Functions): WAL/MANIFEST  관련 함수들에 대한 설명이다.
+> MANIFEST 와 WAL 에서 사용하는 함수들이 기본적으로 다 공통되는 부분이 많기 때문에, 이를 따로 구분하지 않고 WAL 문서에 추가했음
 - [ETC](#ETC): 추가적으로 알게된 연구 결과에 대한 내용을 설명한다.
 
 ## WAL
@@ -28,7 +28,7 @@ LevelDB 의 경우 `.log` 의 파일 형식으로 파일을 저장한다.
 #### Header
 WAL 에서 header 를 저장하는 형식은 다음과 같다.
 
-<img src="https://user-images.githubusercontent.com/49092508/190629855-b7ff4227-11b4-484a-a97d-d21073bee682.png" width="700"/>
+<img src="https://user-images.githubusercontent.com/49092508/190959632-08d86d79-d24c-4d50-bbf6-55fccb829556.png" width="700"/>
 
 순차적으로
 1. CRC Checksum 4byte
@@ -41,43 +41,7 @@ WAL 에서 header 를 저장하는 형식은 다음과 같다.
 WAL 의 header 이후 payload 는 다음의 형식으로 저장한다.
 > 다음의 예시는 {"A": "Hello world!", "B": "Good bye world!", "C": "I am hungry"} 이렇게 3쌍의 Key-value 쌍을 PUT 했을 때 작성되는 WAL 파일의 예시이다.
 
-<img src="https://user-images.githubusercontent.com/49092508/190630588-6431a48b-0c82-43b7-85f0-0aa962930d64.png" width="700"/>
-
-## MANIFEST
-MANIFEST 는 `VersionSet` 과 `VersionEdit` 를 파일로 정리해놓는 기능을 한다. 이는 `MANIFEST-000000` 와 같은 이름으로 저장이 된다. 
-
-MANIFEST 파일은 LevelDB 를 활용하며 이름이 바뀌는데, 이번 실행에서 LevelDB가 사용할 MANIFEST 파일을 지칭하는 파일은 `CURRENT` 파일에 적혀있다.
-
-### VersionSet, VersionEdit
-`VersionSet` 과 `VersionEdit` 의 경우 둘다 version 에 관한 내용을 정리한다. 
-> `VersionSet` 과 `VersionEdit` 의 경우 서로 Friend class 관계이다.
-
-각 class 에서 MANIFEST 파일을 작성하며 사용하는 함수는 각각 하나씩 존재한다.
-
-- `VersionSet::LogAndApply` : 현재 실행하는 버전에 대한 데이터를 MANIFEST 에 저장할 준비를 하고, 최종적으로 데이터를 `VersionEdit::EncodeTo` 를 활용하여 작성하고 MANIFEST 파일에 저장한다.
-
-![image](https://user-images.githubusercontent.com/49092508/190644040-e60217d7-ca32-4419-8a32-b8034aa9909d.png)
-
-- `VersionEdit::EncodeTo` : 실제적으로 작성해야하는 데이터를 binary 형식으로 작성한다. 
-
-![image](https://user-images.githubusercontent.com/49092508/190644269-23463bc4-27e8-4e4c-955c-abfa4df476cd.png)
-
-### DB 를 생성할 때
-![image](https://user-images.githubusercontent.com/49092508/190642300-5b4b12a4-7c4a-4ec0-af74-a339f5a87124.png)
-
-초기에 DB 를 생성할 때, MANIFEST 파일은 위의 절차를 통해서 생성이 된다. 초기에는 다음의 값을 가지고 `VersionEdit` 을 생성하고, 이를 `MANIFEST-000001` 파일에 작성한다.
-
-- `comparator` : `"leveldb.BytewiseComparator`
-- `log_number` : `0`
-- `next_file_number` : 2
-- `last_sequence` : 0
-
-이후 `log::Writer` 함수를 통해 해당 내용을 기록한다.
-
-### DB 를 종료할 때
-![image](https://user-images.githubusercontent.com/49092508/190645030-4865a546-b26b-4702-8bd3-06d1d31f41a0.png)
-
-LevelDB 를 종료할 때 `~DBImpl` 이 호출된다. 이는 기존에 가지고 있던 `VersionSet` 을 `delete` 하며 기존의 버전에 대한 데이터를 MANIFEST 파일에 작성한다. 이때 작성된 `MANIFEST` 파일을 통해, 다음에 LevelDB 를 시작할 때 기존의 버전을 복구할 수 있게 된다.
+<img src="https://user-images.githubusercontent.com/49092508/190959530-2832a72d-8f65-4207-9ca1-2fa227d17acb.png" width="700"/>
 
 ## Functions
 해당 내용은 WAL/MANIFEST 에 관련하여 공부를 하며 알게된 함수들과, 해당 함수들에 대한 설명을 포함한다.
@@ -157,8 +121,6 @@ POSIX 환경에서 `WritableFile` 을 implmentation 한 내용이다. `WritableF
 #### 동작
 - `slice` 타입의 데이터를 가지고 Buffer 에 최대한 적을 수 있는 만큼 작성한다.
 - `slice` 타입의 데이터의 전부를 작성할때까지 반복한다.
-
-
 
 ## ETC
 해당 내용은 WAL 의 여부에 따른 데이터 손실에 대한 간단한 실험에 대한 내용을 포함한다.
