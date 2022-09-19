@@ -33,7 +33,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 4. Compaction
     - [Compaction](./analysis/compaction/compaction.md)
     - [Major Compaction](./analysis/compaction/Major-Compaction.md)
-    - [Minor Compaction]
+    - [Minor Compaction](./analysis/compaction/Minor-Compaction.md)
 5. SSTable
     - [SSTable Format](./analysis/sstable/sstable.md)
     - [SSTable Write](./analysis/sstable/sstable-write.md)
