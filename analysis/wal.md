@@ -104,7 +104,7 @@ WAL 의 header 이후 payload 는 다음의 형식으로 저장한다.
 
 ### `log::Writer::EmitPhysicalRecord`
 
-![image](https://user-images.githubusercontent.com/49092508/190629855-b7ff4227-11b4-484a-a97d-d21073bee682.png)
+<img src="https://user-images.githubusercontent.com/49092508/190959632-08d86d79-d24c-4d50-bbf6-55fccb829556.png" width="700"/>
 
 실제적으로 `slice` 타입의 데이터를 받고, header 를 생성하고 파일을 작성하기 시작하는 함수이다.
 
