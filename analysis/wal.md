@@ -1,5 +1,5 @@
-# WAL/MANIFEST
-이 문서는 WAL/MANIFEST 에 대한 문서이다.
+# WAL
+이 문서는 WAL 에 대한 문서이다.
 ## Index
 - [WAL](#WAL): WAL 에 대한 개요를 설명한다.
 - [Functions](#Functions): WAL/MANIFEST  관련 함수들에 대한 설명이다.
@@ -46,52 +46,57 @@ WAL 의 header 이후 payload 는 다음의 형식으로 저장한다.
 ## Functions
 해당 내용은 WAL/MANIFEST 에 관련하여 공부를 하며 알게된 함수들과, 해당 함수들에 대한 설명을 포함한다.
 
-### `log::reader::ReadRecord`
-```log::reader``` 파일에는  
+`log::reader` 파일에는   
+`Reader` 클래스와 몇 가지 함수가 있다.    
+ 
+<img src="https://drive.google.com/u/1/uc?id=1n0iBamRTZTfV4Nj-i2GqJ0paLpNYuQ8L&export=download" width="700"/>     
+  
+나는 이 중 `bool Reader::ReadRecord(Slice* record, std::string* scratch)` 함수를 중심으로 이 파일의 흐름을 살펴보고자 했다.    
 
-```Reader``` 클래스와 몇 가지 함수가 있다.  
+<img src="https://drive.google.com/u/1/uc?id=14NWw8RAqeUYsQvzb2AxUMACrfSjdEzSN&export=download" width="700"/>   
 
-<img src="https://drive.google.com/u/1/uc?id=1VQ_Q20Z1ZtrY39Lead8EDtCSbr9z-BIS&export=download" width="700"/>  
+- `ReadRecord()` 함수가 실행되면 먼저 이니셜 블록의 위치를 찾는데   
+`SkipToInitialBlock()`함수는 이니셜 블록의 위치가 있는 곳까지 오프셋을 옮긴다.   
+- 이후 `while`문을 돌면서 읽고자 하는 데이터를 읽게 된다.    
+- `while`문을 도는 동안에는 `record_type`이라는 정수형 변수에 `ReadPhysicalRecord()`함수의 리턴 값을 받는다.     
+- 이 함수는 위에서 언급했듯이 `record`의 `type`을 읽고 그를 반환하거나 에러가 있으면 그 에러를 알려준다. 그래서 `type`의 종류가 조금 늘었는데,     
+`kEof, kBadRecord`가 그것이다.
 
-나는 이 파일의 흐름을 살펴보고자 노력했다.  
+ <img src="https://drive.google.com/u/1/uc?id=1OH37ofybb-_cghK5a_gu4Ten8XQTOQpt&export=download" width="700"/>   
+   
+- 읽으려는 데이터가 몇 개의 블럭에 걸쳐 있는지 알기 위해서 혹은 에러가 있는지 확인하기 위해     
+위에 `ReadPhysicalRecord()` 함수를 호출하고 받은 `record_type`값을 이용한다.    
 
-```ReadRecord()``` 함수가 실행되면 이니셜 블록의 위치를 찾은 후 ```while```문을 돌면서 읽고자 하는 데이터를 읽는다.  
-
-```ReadRecord()``` 함수의 매개변수로는 ```record```와 ```scratch```를 받는데,  
-
-읽고자 하는 데이터가 여러 블록으로 나뉘어져 있을 경우 ```scratch```에 각 블럭의 데이터를 ```append```해주었다가 마지막 블럭을 만나면 한번에 ```record```에 준다.  
-
-<img src="https://drive.google.com/u/1/uc?id=1hWZOM3mO0TeymflMS6knKOzybNslOmhE&export=download" width="700"/>  
-
-읽으려는 데이터가 몇 개의 블럭에 걸쳐 있는지 알기 위해서 ```switch```문에서는 각 블럭의 ```type```을 읽고 블럭을 더 읽을 것인지 판단하며  
-
+- `switch`문에서는 각 블럭의 `type`을 읽고 블럭을 더 읽을 것인지 판단하며    
 에러가 있으면 이 또한 처리하는 과정이 있다.  
 
-```kFullType```의 경우 데이터를 읽어 바로 ```record```에 준다음 ```true```를 반환하여 함수를 빠져나온다.  
+- 그리고 `ReadRecord()` 함수의 매개변수로는 `record`와 `scratch`를 받는데,     
+읽고자 하는 데이터가 여러 블록으로 나뉘어져 있을 경우 `scratch`에 각 블럭의 데이터를 `append`해주었다가     
+마지막 블럭을 만나면 한번에 `record`에 준다.    
 
-```kFirstType```의 경우 ```scratch```에 데이터를 ```append```한 후  
+- 또한 `in_fragmented_record`라는 변수가 있는데,    
+이 변수는 읽고자 하는 블럭이 여러 개로 나뉘어져 있는지 판단할 때 사용하며 기본값은 `false`이다.   
 
-```in_fragmented_record``` 변수를 ```true```로 설정하여 뒤에 블럭이 더 있음을 알리는 역할을 한다.  
+1. `kFullType`의 경우 데이터를 읽어 바로 `record`에 준다음 `true`를 반환하며 그대로 함수를 마친다.       
 
-<img src="https://drive.google.com/u/1/uc?id=1hpQesw4cq7697jc_H0pcu_sP-1igFiiK&export=download" width="700"/>  
+2. `kFirstType`의 경우 `scratch`에 데이터를 `append`한 후        
+`in_fragmented_record` 변수를 `true`로 설정하여 뒤에 블럭이 더 있음을 알리는 역할을 하게끔 만든다.      
+여기서는 `in_fragmented_record`가 `false`여야 정상이므로 그렇지 않다면 에러를 Report해준다.   
 
-```kMiddleType```의 경우 ```scratch```에 데이터를 ```append``` 해준다.  
+3. `kMiddleType`의 경우 `scratch`에 데이터를 `append` 해준다.     
+여기서는 `in_fragmented_record`가 `false`라면 핸들링 해준다.     
 
-```kLastType```의 경우 ```scratch```에 데이터를 ```append``` 해준 후  
+4. `kLastType`의 경우 `scratch`에 데이터를 `append` 해준 후       
+여태 추가했던 데이터가 담겨있는 `scratch`를 `Slice` 객체로 바꿔서 `record`에 준다.   
+마찬가지로 `in_fragmented_record`가 `false`라면 핸들링 해준다.     
 
-여태 추가했던 데이터가 담겨있는 ```scratch```를 ```Slice``` 객체로 바꿔서 ```record```에 준다.  
+5. `kEof`의 경우는 더이상 읽을 블럭이 없을 때이다.    
+그러므로 ```false```를 반환하여 그대로 함수를 마친다.    
 
-```kEof```의 경우는 더이상 읽을 블럭이 없을 때이다.  
+6. `kBadRecord`의 경우 `checksum`이 맞지 않거나 레코드의 길이가 0이거나 등     
+오류가 있어 물리 레코드에서 읽어오지 못한 경우에 처리된다.   
 
-<img src="https://drive.google.com/u/1/uc?id=1nPL8OqHRJ03CzOKO6cWtbdU1i-T_fCiC&export=download" width="700"/>  
-
- ```kBadRecord```의 경우 ```checksum```이 맞지 않거나 레코드의 길이가 0이거나 등  
-
- 오류가 있어 물리 레코드에서 읽어오지 못한 경우 처리된다.
-
- ```모든  keyType에  해당되지  않는  경우```는 오류를 알린다.  
-
-<img src="https://drive.google.com/u/1/uc?id=1wa81Pks8xtTKhS7hz0gK579JJK1gAKMg&export=download" width="700"/>  
+7. `모든 keyType에 해당되지 않는 경우`는 오류를 알린다.   
 
 ### `log::Writer:AddRecord`
 
