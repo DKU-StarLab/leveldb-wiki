@@ -28,7 +28,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 ### LevelDB 코드 분석
 0. Overall
 1. Key-Value Interface
-2. [WAL](./analysis/wal.md) / [MANIFEST](./analysis/manifest.md)
+2. [WAL](./analysis/wal.md)
 3. [Memtable](./analysis/memtable.md)
 4. Compaction
     - [Compaction](./analysis/compaction/compaction.md)
@@ -43,7 +43,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
     - [Bloom Filter Write](./analysis/bloomfilter/bloomfilter-write.md)
     - [Bloom Filter Read](./analysis/bloomfilter/bloomfilter-read.md)
 7. [Cache](./analysis/cache.md)
-8. [Manifest]
+8. [Manifest](./analysis/manifest.md)
 
 ### 벤치마크 실험 분석
 - WAL
