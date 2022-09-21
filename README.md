@@ -28,7 +28,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 ### LevelDB 코드 분석
 0. Overall
 1. Key-Value Interface
-2. [WAL](./analysis/wal.md)
+2. [WAL](./analysis/wal.md) / [MANIFEST](./analysis/manifest.md)
 3. [Memtable](./analysis/memtable.md)
 4. Compaction
     - [Compaction](./analysis/compaction/compaction.md)
