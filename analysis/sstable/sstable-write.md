@@ -31,8 +31,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
                   TableCache* table_cache, Iterator* iter, FileMetaData* meta) {
   Status s;
   meta->file_size = 0;
-
-  // 이터레이터가 첫 요소를 가리키도록 함
+  // Make that the Iterator points to the first element
   iter->SeekToFirst();
 
   std::string fname = TableFileName(dbname, meta->number);
@@ -43,12 +42,12 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
       return s;
     }
 
-    // 1. TableBuilder 인스턴스를 만든다
+    // 1. Create an instance of TableBuilder
     TableBuilder* builder = new TableBuilder(options, file);
     meta->smallest.DecodeFrom(iter->key());
     Slice key;
 
-    // 2. TableBuilder의 Add메소드를 통해 MemTable의 key-value pair들을 하나하나 추가한다.
+    // 2. Add key-value pairs of MemTable one by one via TableBuilder`s "Add" method
     for (; iter->Valid(); iter->Next()) {
       key = iter->key();
       builder->Add(key, iter->value());
@@ -57,7 +56,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
       meta->largest.DecodeFrom(key);
     }
 
-    // 3. TableBuilder의 Finish메소드를 통해 SSTable을 만드는 과정을 마무리한다.
+    // 3. Complete the process of creating SSTable via TableBuilder's "Finish" method
     s = builder->Finish();
     if (s.ok()) {
       meta->file_size = builder->FileSize();
@@ -65,7 +64,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
     }
     delete builder;
 
-    // 4. WritableFile에 있는 내용들을 storage에 쓴다
+    // 4. Write the contents in the WritableFile to storage
     if (s.ok()) {
       s = file->Sync();
     }
@@ -76,7 +75,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
     file = nullptr;
 
     if (s.ok()) {
-      // 5. storage에 저장한 SSTable을 cache에 올려서 사용가능한지 확인해본다.
+      // 5. Put the SSTable stored in storage into cache and check if it is available
       Iterator* it = table_cache->NewIterator(ReadOptions(), meta->number,
                                               meta->file_size);
       s = it->status();
@@ -84,7 +83,7 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
     }
   }
 
-  // 이터레이터 관련 오류 확인
+  // Check for Iterator related errors
   if (!iter->status().ok()) {
     s = iter->status();
   }
@@ -110,9 +109,10 @@ Status BuildTable(const std::string& dbname, Env* env, const Options& options,
 void TableBuilder::Add(const Slice& key, const Slice& value) {
   Rep* r = rep_;
   
-  // ...생략
+  // ...
 
-  // 1. 현재 BlockBuilder로 만드는 Data Block이 비어있다면, Index Block에 새 Entry를 추가한다.
+  // 1. If the Data Block that BlockBuilder is creating is empty,
+  //    add a new entry to the Index Block
   if (r->pending_index_entry) {
     assert(r->data_block.empty());
     r->options.comparator->FindShortestSeparator(&r->last_key, key);
@@ -122,18 +122,18 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
     r->pending_index_entry = false;
   }
 
-  // 2. Bloom Filter를 사용하는 경우 Filter Block도 업데이트한다.
+  // 2. If using Bloom Filter, update the Filter Block as well
   if (r->filter_block != nullptr) {
     r->filter_block->AddKey(key);
   }
 
   r->last_key.assign(key.data(), key.size());
   r->num_entries++;
-  // 3. Data Block에 데이터를 추가한다.
+  // 3. Add data to the Data Block
   r->data_block.Add(key, value);
 
   const size_t estimated_block_size = r->data_block.CurrentSizeEstimate();
-  // 4. 만약 작성 중인 Data Block이 꽉 찼다면 Flush를 호출한다.
+  // 4. If the Data Block being created is full, call "Flush"
   if (estimated_block_size >= r->options.block_size) {
     Flush();
   }
@@ -151,20 +151,20 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
 ```cpp
 Status TableBuilder::Finish() {
   Rep* r = rep_;
-  // 1. Flush를 호출한다.
+  // 1. Call "Flush"
   Flush();
   assert(!r->closed);
   r->closed = true;
 
   BlockHandle filter_block_handle, metaindex_block_handle, index_block_handle;
 
-  // 2. Bloom Filter를 사용하는 경우 WritableFile에 Filter Block을 추가한다.
+  // 2. If using Bloom Filter, add the Filter Block to the WritableFile.
   if (ok() && r->filter_block != nullptr) {
     WriteRawBlock(r->filter_block->Finish(), kNoCompression,
                   &filter_block_handle);
   }
 
-  // 3. WritableFile에 Meta Index Block을 추가한다.
+  // 3. Add the Meta Index Block to the WritableFile
   if (ok()) {
     BlockBuilder meta_index_block(&r->options);
     if (r->filter_block != nullptr) {
@@ -178,7 +178,7 @@ Status TableBuilder::Finish() {
     WriteBlock(&meta_index_block, &metaindex_block_handle);
   }
 
-  // 4. WritableFile에 Index Block을 추가한다.
+  // 4. Add the Index Block to the WritableFile.
   if (ok()) {
     if (r->pending_index_entry) {
       r->options.comparator->FindShortSuccessor(&r->last_key);
@@ -190,7 +190,7 @@ Status TableBuilder::Finish() {
     WriteBlock(&r->index_block, &index_block_handle);
   }
 
-  // 5. WritableFile에 Footer를 추가한다.
+  // 5. Add the Footer to the WritableFile.
   if (ok()) {
     Footer footer;
     footer.set_metaindex_handle(metaindex_block_handle);
@@ -217,16 +217,16 @@ Status TableBuilder::Finish() {
 void TableBuilder::Flush() {
   Rep* r = rep_;
   
-  // ...생략
+  // ...
 
-  // 1. BlockBuilder로 만들고 있는 Data Block의 contents를 WritableFile에 추가한다.
+  // 1. Add the contents of the Data Block being created to the WritableFile
   WriteBlock(&r->data_block, &r->pending_handle);
   if (ok()) {
     r->pending_index_entry = true;
-    // 2. WritableFile에 쓴 내용을 storage에 쓴다.
+    // 2. Write the contents of WritableFile to storage
     r->status = r->file->Flush();
   }
-  // 3. Bloom Filter를 사용할 경우 새 Bloom Filter를 만든다. 
+  // 3. If using Bloom Filter, create a new Bloom Filter
   if (r->filter_block != nullptr) {
     r->filter_block->StartBlock(r->offset);
   }

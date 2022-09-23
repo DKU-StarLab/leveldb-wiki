@@ -28,17 +28,22 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 ### LevelDB 코드 분석
 0. Overall
 1. Key-Value Interface
-2. [WAL]
-3. [Memtable]
-4. [Compaction]
+2. [WAL](./analysis/wal.md)
+3. [Memtable](./analysis/memtable.md)
+4. Compaction
+    - [Compaction](./analysis/compaction/compaction.md)
+    - [Major Compaction](./analysis/compaction/Major-Compaction.md)
+    - [Minor Compaction](./analysis/compaction/Minor-Compaction.md)
 5. SSTable
-    - [SSTable Format](./analysis/sstable.md)
-    - [SSTable Write](./analysis/sstable-write.md)
-    - [SSTable Read](./analysis/sstable-read.md)
-6. [Bloom Filter](./analysis/bloomfilter.md)
-7. [Cache]
-8. [Manifest]
-9. LevelDB db_bench
+    - [SSTable Format](./analysis/sstable/sstable.md)
+    - [SSTable Write](./analysis/sstable/sstable-write.md)
+    - [SSTable Read](./analysis/sstable/sstable-read.md)
+6. Bloom Filter
+    - [Bloom Filter](./analysis/bloomfilter/bloomfilter.md)
+    - [Bloom Filter Write](./analysis/bloomfilter/bloomfilter-write.md)
+    - [Bloom Filter Read](./analysis/bloomfilter/bloomfilter-read.md)
+7. [Cache](./analysis/cache.md)
+8. [Manifest](./analysis/manifest.md)
 
 ### 벤치마크 실험 분석
 - WAL
