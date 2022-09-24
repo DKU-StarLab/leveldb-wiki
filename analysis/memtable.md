@@ -1,6 +1,7 @@
 # Memtable
 Memtable 은 log의 memory copy로 볼수 있습니다. 주요역할은 log내의 데이터를 구조화 저장하는 것입니다.
 ![leveldb_format](https://wiesen.github.io/assets/leveldb-architecture.png)
+
 (source https://www.jianshu.com/p/0e6116f23c3d</font>)
 
 DB에 write를 할 때 leveldb의 kv데이터를 저장하는 공간이 Memtable입니다, Memtable에 write한 데이터가 지정한 크기(Options:write_buffer_size)를 초과하면 Immutable memtable로 변환하고 동시에 Memtable을 새로 더 만들어 데이터를 write합니다. Background에서 compaction이 일어나면 immutable을 dump to disk 해 sstable이 생성합니다.
@@ -17,6 +18,7 @@ Klength&Vlength----Varint32, 최대 5Byte. SequenceNumber+ValueType----8Byte.
 ### Component
 ##### Arena : memtable의 memory관리
 ![arena](https://wiesen.github.io/assets/arena.png)
+
 (source http://mingxinglai.com/cn/2013/01/leveldb-arena/)
 1. 메모리 사용 통계를 위한 메모리 포장 작업: memtable의 크기는 한계가 정해져 있습니다(write_buffer_size), 통일한 interface로 통해 메모리를 분배.
 2. 메모리 정렬을 보증: Arena는 kBlockSize(static const int kBlockSize = 4096)단위로 memory를 신청, momory address정렬을 제공해서 memory의 사용을 기록하고 효율을 높입니다.(vector을 사용해서 분배한 memory를 저장)
@@ -25,6 +27,7 @@ Klength&Vlength----Varint32, 최대 5Byte. SequenceNumber+ValueType----8Byte.
 5. Memtable에서 인용 계수(refs)가 사용됩니다: immutable_memtable이 disk에 dump완성후 삭제를 해야하지만, user가 read하고 있다면(refs != 0) 삭제를 하지 않습니다.
 #### Skiplist : memtable의 실제 구조
 ![skiplist](https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Skip_list_add_element-en.gif/400px-Skip_list_add_element-en.gif)
+
 (source https://en.wikipedia.org/wiki/Skip_list)
 1. 하나의 정렬 구조에 insert(random write) 조작 실행은 cost가 많아서 일반적으로 성능의 병목이 여기에 집중됩니다. List, AVL tree, B tree, skiplist등은 random write에 가속화 되어 있습니다. Leveldb에서는 복잡한 B tree를 사용하지 않고 경량한 skiplist를 사용합니다.
 2. Skiplist는 binary tree를 대체할수 있는 데이터 구조입니다. skiplist는 확율(node의 level을 rand함수로 설정)로 균형을 확보할수 있습니다, 구조와 실현은 binary tree보다 간단하지만 time complexity은 비슷한  O(logN)만 아니라 공간 절약도 가능합니다.
