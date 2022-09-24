@@ -8,9 +8,13 @@ DB에 write를 할 때 leveldb의 kv데이터를 저장하는 공간이 Memtable
 - - -
 ### Structure & Operation
 ![memtable_key_entry](https://img-blog.csdnimg.cn/20200722115037994.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3JlZGZpdmVoaXQ=,size_16,color_FFFFFF,t_70)
-Klength&Vlength----Varint32, 최대 5Byte. SequenceNumber+ValueType----8Byte.
 
 (source https://blog.csdn.net/redfivehit/article/details/107509884)
+
+Klength&Vlength: Varint32, 최대 5Byte.
+SequenceNumber+ValueType: 8Byte.
+
+
 
 * memtable key의 구성은 Leveldb:Basic Setting로 참조할수 있습니다. Memtable의 key는 4개부분으로 구성됩니다: Memtable key = key length + user key + value type + sequence number.
 * Memtable에서는 같은 key의 multi version을 저장할수 있습니다. KeyComparator가 먼저 user key를 ↑순서로 비교하고, ↓순서로 sequence number를 비교하면 entry를 확정할수 있습니다. 동일한user key를 sequence number로 조작하기위해 user key를 앞에다 둔 거로 알고 있습니다.
