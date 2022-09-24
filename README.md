@@ -20,32 +20,25 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 * 교수님: [최종무](http://embedded.dankook.ac.kr/~choijm/), [유시환](https://sites.google.com/site/dkumobileos/members/seehwanyoo)
 
 ## 목차
-### 배경
-1. 키-밸류 스토어란 무엇인가?
-2. 왜 오픈소스 인가?
-3. 키-밸류 스토어 채용 현황
-
-### LevelDB 코드 분석
-0. Overall
-1. Key-Value Interface
-2. [WAL](./analysis/wal.md)
-3. [Memtable](./analysis/memtable.md)
-4. Compaction
+### 1. LevelDB 분석
+1. [WAL](./analysis/wal.md)
+2. [Memtable](./analysis/memtable.md)
+3. Compaction
     - [Compaction](./analysis/compaction/compaction.md)
     - [Major Compaction](./analysis/compaction/Major-Compaction.md)
     - [Minor Compaction](./analysis/compaction/Minor-Compaction.md)
-5. SSTable
+4. SSTable
     - [SSTable Format](./analysis/sstable/sstable.md)
     - [SSTable Write](./analysis/sstable/sstable-write.md)
     - [SSTable Read](./analysis/sstable/sstable-read.md)
-6. Bloom Filter
+5. Bloom Filter
     - [Bloom Filter](./analysis/bloomfilter/bloomfilter.md)
     - [Bloom Filter Write](./analysis/bloomfilter/bloomfilter-write.md)
     - [Bloom Filter Read](./analysis/bloomfilter/bloomfilter-read.md)
-7. [Cache](./analysis/cache.md)
-8. [Manifest](./analysis/manifest.md)
+6. [Cache](./analysis/cache.md)
+7. [Manifest](./analysis/manifest.md)
 
-### 벤치마크 실험 분석
+### 2. 벤치마크 실험 및 분석
 - WAL
     - [실험 1](./benchmarks/wal_1.md)
     - [실험 2](./benchmarks/wal_2.md)
@@ -56,7 +49,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 - [Bloom Filter](./benchmarks/bloomfilter.md)
 - [Cache](./benchmarks/cache.md)
 
-### YCSB 튜닝 대회
+### 3. YCSB 튜닝 대회
  - [워크로드 및 대회 소개](https://github.com/DKU-StarLab/leveldb-study/blob/main/tuning/README.md)
  - [Team SSTable 레포트](./tuning/%5BTuning%5Dteam_SSTable_report.md)
  - [Team Bloom Filter 레포트](./tuning/%5BTuning%5Dteam_bloomfilter_report.md)
@@ -67,14 +60,12 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 
 
 ### 부록
-1.LevelDB 설치
-
-2.분석툴 사용법
+1.분석툴 사용법
 * Understand
 * GDB (shell script)
 * Uftrace (shell script)  
 
-3.LevelDB db_bench 예제
+2.LevelDB db_bench 예제
 * [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
 * [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
@@ -104,8 +95,5 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
   - [Understand](https://licensing.scitools.com/download)
   - [Uftrace](https://github.com/namhyung/uftrace)
   - [Draw.io](https://www.draw.io)
-#### 4. Real-World Workload
-  - [Twitter cache trace](https://github.com/twitter/cache-trace)
-  - [Facebook ZippyDB](https://github.com/facebook/rocksdb/wiki/RocksDB-Trace%2C-Replay%2C-Analyzer%2C-and-Workload-Generation)
-#### 5. Previous Study
+#### 4. Previous Study
   - [DKU RocksDB Festival, 2021](https://github.com/DKU-StarLab/RocksDB_Festival)
