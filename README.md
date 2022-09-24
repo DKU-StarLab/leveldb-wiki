@@ -7,19 +7,19 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 
 문서 내용에 오류가 있거나, 추가사항이 있으시다면 언제든지 Pull Request를 통해 기여해주시면 감사하겠습니다.
 
-## 저자
-* 학생:
-  - 1.WAL/Manifest: [김이수](https://github.com/gooday2die), [박세연](https://github.com/SayOny), [신수환](https://github.com/Student5421)
-  - 2.Memtable: [조태규](https://github.com/HASHTAG-YOU), [쥬용지에](https://github.com/arashio1111)
-  - 3.Compaction: [강상우](https://github.com/aarom416), [박서영](https://github.com/seo-0), [좌오꾸와쒼](https://github.com/ErosBryant)
-  - 4.SSTable: [박종기](https://github.com/JongKI-PARK), [조상현](https://github.com/Cho-SangHyun)
-  - 5.Bloom Filter: [김한수](https://github.com/gillyongs)
-  - 6.Cache: [하승원](https://github.com/ha-seungwon), [홍수빈](https://github.com/sss654654)
-* 조교: [최민국](https://github.com/korea-choi)
-* 선임 조교: [이성현](https://github.com/shl812), [신호진](https://github.com/shinhojin)
-* 교수님: [최종무](http://embedded.dankook.ac.kr/~choijm/), [유시환](https://sites.google.com/site/dkumobileos/members/seehwanyoo)
+## Authors
+* Student:
+  - 1.WAL/Manifest: [Isu Kim](https://github.com/gooday2die), [Seyeon Park ](https://github.com/SayOny), [Suhwan Shin](https://github.com/Student5421)
+  - 2.Memtable: [Taegyu Cho ](https://github.com/HASHTAG-YOU), [Zhu Yongjie](https://github.com/arashio1111)
+  - 3.Compaction: [Sangwoo Kang](https://github.com/aarom416), [Seoyoung Park](https://github.com/seo-0), [Zhao Guangxun](https://github.com/ErosBryant)
+  - 4.SSTable: [Jongki Park](https://github.com/JongKI-PARK), [Sanghyun Cho](https://github.com/Cho-SangHyun)
+  - 5.Bloom Filter: [Hansu Kim](https://github.com/gillyongs)
+  - 6.Cache: [Seungwon Ha](https://github.com/ha-seungwon), [Subin Hong](https://github.com/sss654654)
+* Assistant: [Min-guk Choi](https://github.com/korea-choi)
+* Senior Assistant: [Sounghyoun Lee](https://github.com/shl812), [Hojin Shin](https://github.com/shinhojin)
+* Professor: [Jongmoo Choi](http://embedded.dankook.ac.kr/~choijm/), [Seehwan Yoo](https://sites.google.com/site/dkumobileos/members/seehwanyoo)
 
-## 목차
+## Contents
 ### 1. LevelDB Code Analysis
 1. [WAL](./analysis/wal.md)
 2. [Memtable](./analysis/memtable.md)
