@@ -168,8 +168,8 @@ False positive가 발생할 확률을 수학적으로 정리하면 위와 같으
 
 
 # Code Flow of Bloom Filter
-[Write : Bloom Filter의 생성](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-write.md)  
-[Read : Bloom Filter로 특정 key의 존재 여부를 빠르게 확인](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter-read.md) 
+[Write : Bloom Filter의 생성](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter/bloomfilter-write.md)
+[Read : Bloom Filter로 특정 key의 존재 여부를 빠르게 확인](https://github.com/DKU-StarLab/leveldb-wiki/blob/main/analysis/bloomfilter/bloomfilter-read.md)
 
  <br/>
 <br/>
