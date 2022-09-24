@@ -61,13 +61,13 @@ You can conveniently read LevelDB WIKI as an [e-book](https://sslab.dankook.ac.k
   - [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
   - [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
-## 사진
+## Photo
 <img src="./image/photo.png" width="100%">
 
-## 포스터
+## Poster
 <img src="./image/poster_kor.png" width="50%">
 
-## 참고문헌
+## References
 #### 1. Documents
   - [LevelDB Document](https://github.com/google/leveldb/blob/main/doc)
   - [RocksDB Wiki](https://github.com/facebook/rocksdb/wiki)
