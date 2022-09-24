@@ -20,7 +20,7 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 * 교수님: [최종무](http://embedded.dankook.ac.kr/~choijm/), [유시환](https://sites.google.com/site/dkumobileos/members/seehwanyoo)
 
 ## 목차
-### 1. LevelDB 분석
+### 1. LevelDB Code Analysis
 1. [WAL](./analysis/wal.md)
 2. [Memtable](./analysis/memtable.md)
 3. Compaction
@@ -38,36 +38,30 @@ DKU System Software Lab의 홈페이지에서 [LevelDB WIKI를 전자책](https:
 6. [Cache](./analysis/cache.md)
 7. [Manifest](./analysis/manifest.md)
 
-### 2. 벤치마크 실험 및 분석
+### 2. Benchmark Experiment
 - WAL
-    - [실험 1](./benchmarks/wal_1.md)
-    - [실험 2](./benchmarks/wal_2.md)
-    - [실험 3](./benchmarks/wal_3.md)
+    - [Experiment 1](./benchmarks/wal_1.md)
+    - [Experiment 2](./benchmarks/wal_2.md)
+    - [Experiment 3](./benchmarks/wal_3.md)
 - [Memtable](./benchmarks/memtable.md)
 - [Compaction](./benchmarks/compaction.md)
 - [SSTable](./benchmarks/sstable.md)
 - [Bloom Filter](./benchmarks/bloomfilter.md)
 - [Cache](./benchmarks/cache.md)
 
-### 3. YCSB 튜닝 대회
- - [워크로드 및 대회 소개](https://github.com/DKU-StarLab/leveldb-study/blob/main/tuning/README.md)
- - [Team SSTable 레포트](./tuning/%5BTuning%5Dteam_SSTable_report.md)
- - [Team Bloom Filter 레포트](./tuning/%5BTuning%5Dteam_bloomfilter_report.md)
- - [Team WAL/Manifest 레포트](./tuning/%5BTuning%5Dteam_WAL%2CManifest_report.md)
- - [Team Memtable 레포트](./tuning/%5BTuning%5Dteam_memtable_report.md)
- - [Team Cache 레포트](./tuning/%5BTuning%5Dteam_cache_report.md)
- - [Team Compaction 레포트](./tuning/%5BTuning%5Dteam_Compaction_report.md)
+### 3. YCSB Tuning Contest
+ - [Tuning Contest Guide](https://github.com/DKU-StarLab/leveldb-study/blob/main/tuning/README.md)
+ - [Team SSTable Report](./tuning/%5BTuning%5Dteam_SSTable_report.md)
+ - [Team Bloom Filter Report](./tuning/%5BTuning%5Dteam_bloomfilter_report.md)
+ - [Team WAL/Manifest Report](./tuning/%5BTuning%5Dteam_WAL%2CManifest_report.md)
+ - [Team Memtable Report](./tuning/%5BTuning%5Dteam_memtable_report.md)
+ - [Team Cache Report](./tuning/%5BTuning%5Dteam_cache_report.md)
+ - [Team Compaction Report](./tuning/%5BTuning%5Dteam_Compaction_report.md)
 
 
-### 부록
-1.분석툴 사용법
-* Understand
-* GDB (shell script)
-* Uftrace (shell script)  
-
-2.LevelDB db_bench 예제
-* [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
-* [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
+### 4. Pratice 
+  - [Question](https://github.com/DKU-StarLab/leveldb-study/issues/6)
+  - [Solution](https://github.com/DKU-StarLab/leveldb-study/blob/main/introduction/homework_solution.md)  
 
 ## 사진
 <img src="./image/photo.png" width="100%">
