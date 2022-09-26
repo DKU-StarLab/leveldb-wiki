@@ -1,7 +1,5 @@
 # LevelDB WIKI
-LevelDB WIKI has been written through [the 2022 LevelDB study](https://github.com/DKU-StarLab/leveldb-study) hosted by [the DKU System Software Lab](https://sslab.dankook.ac.kr/).
-This document is a summary of what students have studied LevelDB through the study.
-This document explains the background, structure, analysis, and how to analyze LevelDB.
+LevelDB WIKI is a summary of what students have studied LevelDB through [the 2022 LevelDB study](https://github.com/DKU-StarLab/leveldb-study) hosted by [the DKU System Software Lab](https://sslab.dankook.ac.kr/). This document explains the background, structure, analysis, and how to analyze LevelDB.
 
 You can conveniently read LevelDB WIKI as an [e-book](https://sslab.dankook.ac.kr/leveldb-wiki/) at the DKU System Software Lab website. If there are any errors or additions in the document content, please feel free to contribute through a **Pull Request**.
 
